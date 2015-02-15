@@ -12,7 +12,8 @@ REPOSITORY INDEX
 together.
     -stringSplit.m: A MATLAB imlementation if the function splitting 
 strings at delimiter positions.
-
+    -chdir.m: cd with an history. Using chdir('-') returns to previously 
+visited directories.
 
 LICENSING INFORMATION
 ---------------------
