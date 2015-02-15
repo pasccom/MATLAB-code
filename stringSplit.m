@@ -1,5 +1,5 @@
 function [parts] = stringSplit(string, delimiter)
-%% SPLITSTIRING Splits a string into parts according to delimiter
+%% STRINGSPLIT Splits a string into parts according to delimiter.
 %   @param string The string to split.
 %   @param delimiter The delimiter for parts of the splitted string.
 %   @return parts A column cell array containing the string splitted
