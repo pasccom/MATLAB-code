@@ -8,14 +8,17 @@ or below for a short note).
 
 REPOSITORY INDEX
 ----------------
-    -strjoin.m: A MATLAB implementation of the function gluing strings 
-together.
-    -stringSplit.m: A MATLAB imlementation if the function splitting 
-strings at delimiter positions.
     -chdir.m: cd with an history. Using chdir('-') returns to previously 
 visited directories.
     -fullpath.m: Returns the absolute (aka full) path to the same location 
 as the given path (may already be absolute).
+    -parseProperties.m: Parses a property-value list and check the values 
+respect some given constraints.
+    -strjoin.m: A MATLAB implementation of the function gluing strings 
+together.
+    -stringSplit.m: A MATLAB imlementation if the function splitting 
+strings at delimiter positions.
+
 
 LICENSING INFORMATION
 ---------------------
