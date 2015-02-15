@@ -1,0 +1,6 @@
+# Ignores all the non-*.m files:
+*
+!*.m
+
+# Prevent .gitignore itself from being ignored:
+!.gitignore
