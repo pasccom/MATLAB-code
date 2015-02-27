@@ -140,7 +140,7 @@ function newFigHandle = mosaicFigure(varargin)
             noop(e)
             % The listof figures has probably been cleared out:
             % Tries to recover from backup.
-            backup = load([getFilePath(), filesep, 'figList.mat']);
+            backup = load([tempdir, 'figList.mat']);
             figList = backup.figList;
             try
                 gr = findGroup(group, figList);
@@ -221,7 +221,7 @@ function newFigHandle = mosaicFigure(varargin)
             end
         end
         % Saves figure list:
-        save([getFilePath(), filesep, 'figList.mat'], 'figList');
+        save([tempdir, 'figList.mat'], 'figList');
         
         % Relayout (refresh monitor positions because monitors may have
         % been added or disconnected
@@ -281,7 +281,7 @@ function newFigHandle = mosaicFigure(varargin)
     figure(newFigHandle);
     
     %% Saves figure list:
-    save([getFilePath(), filesep, 'figList.mat'], 'figList');
+    save([tempdir, 'figList.mat'], 'figList');
 end
 
 function layout(group, screenSizes, varargin)
