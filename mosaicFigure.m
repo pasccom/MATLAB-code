@@ -106,20 +106,30 @@ function newFigHandle = mosaicFigure(varargin)
     %% Argument parsing:
     group = [];
     monitor = uint8(0);
-    % First argument is the monitor number (or 0 if not assigned)
+    % First argument is the monitor number (or 0 if not assigned) if it is
+    % not a string. Otherwise its the group name and the second argument is
+    % in the property list.
     if (nargin > 0)
-        monitor = uint8(varargin{1});
+        if (ischar(varargin{1}))
+            group = varargin{1};
+        else
+            monitor = uint8(varargin{1});
+        end
     end
-    % Second argument is the group name or number (defaults to empty)
-    if (nargin > 1)
+    % Second argument is the group name if it has not already been read 
+    % or number (defaults to empty).
+    if ((nargin > 1) && isempty(group))
         group = varargin{2};
         if (isnumeric(group))
             group = int64(group);
         end
+        beginPropertyList = 3;
+    else
+        beginPropertyList = 2;
     end
-    % Third argument and others are properties
-    if (nargin > 2)
-        handles = parseProperties(handles, properties, varargin{3:end});
+    % Other arguments are properties
+    if (nargin >= beginPropertyList)
+        handles = parseProperties(handles, properties, varargin{beginPropertyList:end});
     end
     
     %% Argument cheching:
