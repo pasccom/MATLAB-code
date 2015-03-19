@@ -203,7 +203,7 @@ function newFigHandle = mosaicFigure(varargin)
         error('MATLAB:BadArgumentValue', ...
               'The group name "all" is a reserved group name and should not be used');
     end
-    if (~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
+    if (ischar(group) && ~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
         error('MATLAB:BadArgumentValue', ...
              ['The group name must not be an integer number as a string.', ...
               'However you can used the integer number as is.']);
@@ -219,16 +219,14 @@ function newFigHandle = mosaicFigure(varargin)
         % Find the group number of the figure being deleted:
         try
             gr = findGroup(group, figList);
-        catch e
-            noop(e)
+        catch e %#ok I don't want information on an error in findgroup
             % The listof figures has probably been cleared out:
             % Tries to recover from backup.
             backup = load([tempdir, 'figList.mat']);
             figList = backup.figList;
             try
                 gr = findGroup(group, figList);
-            catch e
-                noop(e)
+            catch e %#ok I don't want information on an error in findgroup
                 delete(src);
                 return;
             end
@@ -300,6 +298,7 @@ function newFigHandle = mosaicFigure(varargin)
             % If group is empty, then remove it:
             if (isempty(figList{gr}.contents))
                 figList(gr) = [];
+                save([tempdir, 'figList.mat'], 'figList');
                 return;
             end
         end
