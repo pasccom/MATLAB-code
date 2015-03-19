@@ -26,9 +26,19 @@ function newFigHandle = mosaicFigure(varargin)
 % strategy. See the code of each layout strategy for indication on how 
 % they work. 
 %
+% Special commands:
+%   mosaicFigure close
+%   mosaicFigure close all
+%   Closes all the figures managed by mosaidFigure.
+%   mosaicFigure closes groupName
+%   Closes all the figures in the group named groupname
+%   
+%   Can also be used under function form.
+%
 % Debug usages:
-%   mosaicFigure('debug') returns the state of the function (the list of
-% all mosaic figures).
+%   mosaicFigure debug 
+%   Returns the state of the function (the list of all mosaic figures).
+%   Can also be used under function form.
 %   mosaicFigure('debugLayout', group, monitorSizes) allows you to simulate 
 % layout with other monitor sizes than the real ones.
 %
@@ -103,6 +113,58 @@ function newFigHandle = mosaicFigure(varargin)
         return;
     end
     
+    %% Command parsing:
+    % The close command:
+    if ((nargin >= 1) && strcmp(varargin{1}, 'close'))
+        % Argument parsing:
+        if(nargin < 2)
+            group = 'all';
+        else
+            group = varargin{2};
+        end
+        if (nargin > 2)
+            warning('MATLAB:TooManyArguments', ...
+                    ['MosaicFigure close command only needs 1 argument.', ...
+                    'Others will be ignored']);
+        end
+        if (isnumeric(group) && (round(group) == group))
+            group = int64(group);
+        elseif (ischar(group) && ~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
+            group = int64(sscanf(group, '%d'));
+        end
+        if (~ischar(group) && ~isinteger(group))
+            error('MATLAB:BadArgumentType', ...
+                  'Group names must be integers or chars');
+        end
+        % If the fig list has been reset, try recover from backup:
+        if ((size(figList, 1) == 1) && isempty(figList{1}))
+            backup = load([tempdir, 'figList.mat']);
+            figList = backup.figList;
+        end
+        % Closes the figures:
+        if (strcmp(group, 'all'))
+            for g = 1:size(figList, 2)
+                if (g == 1)
+                    closeGroup(figList{g});
+                else
+                    closeGroup(figList{g}.contents);
+                end
+            end
+            figList = {};
+        else
+            g = findGroup(group, figList);
+            if (isempty(g))
+                warning('MosaicFigure:GroupNotFound', ...
+                        'Could not find the specified group "%s".', ...
+                        num2str(group));
+            else
+                closeGroup(figList{g}.contents);
+                figList(g) = [];
+            end
+        end
+        return
+    end
+    
     %% Argument parsing:
     group = [];
     monitor = uint8(0);
@@ -134,10 +196,21 @@ function newFigHandle = mosaicFigure(varargin)
     
     %% Argument cheching:
     if (~ischar(group) && ~isinteger(group) && ~isempty(group))
-        error('MATLAB:BadArgumentType', 'Group must be either a string, an integer or an empty array');
+        error('MATLAB:BadArgumentType', ...
+              'Group must be either a string, an integer or an empty array');
+    end
+    if (ischar(group) && strcmp(group, 'all'))
+        error('MATLAB:BadArgumentValue', ...
+              'The group name "all" is a reserved group name and should not be used');
+    end
+    if (~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
+        error('MATLAB:BadArgumentValue', ...
+             ['The group name must not be an integer number as a string.', ...
+              'However you can used the integer number as is.']);
     end
     if (monitor > size(monitorSizes, 1))
-        warning('MATLAB:ArgumentOutOfRange', 'There is only %d monitors.', size(monitorSizes, 1));
+        warning('MATLAB:ArgumentOutOfRange', ...
+                'There is only %d monitors.', size(monitorSizes, 1));
         monitor = 0;
     end
     
@@ -292,6 +365,20 @@ function newFigHandle = mosaicFigure(varargin)
     
     %% Saves figure list:
     save([tempdir, 'figList.mat'], 'figList');
+end
+
+function closeGroup(group)
+%% CLOSEGROUP Closes a group of figures.
+% This function closes the group of figure given in group.
+% If 'all' is passed, then it closes all the figures created with
+% mosaicFigure without prompt.
+%   @param group A column structure array with the following fields:
+%       -handle: The handle to the corresponding figure.
+%       -screen: The screen ion which the figure must be displayed.
+    for f=1:size(group, 1)
+        %set(group(f).handle, 'CloseRequestFcn', closereq);
+        delete(group(f).handle);
+    end
 end
 
 function layout(group, screenSizes, varargin)
