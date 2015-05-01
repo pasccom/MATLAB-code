@@ -8,17 +8,17 @@ or below for a short note).
 
 REPOSITORY INDEX
 ----------------
-    -chdir.m: cd with an history. Using chdir('-') returns to previously 
-visited directories.
-    -fullpath.m: Returns the absolute (aka full) path to the same location 
-as the given path (may already be absolute).
-    -mosaicFigure.m: Creates a new figure which occupies as much screen as 
-possible instead of being stacked on the previously created figures.
-    -parseProperties.m: Parses a property-value list and check the values 
+    -`chdir.m`: `cd` with an history. Using `chdir('-')` returns to 
+previously visited directories.
+    -`fullpath.m`: Returns the absolute (aka full) path to the same 
+location as the given path (may already be absolute).
+    -`mosaicFigure.m`: Creates a new figure which occupies as much screen 
+as possible instead of being stacked on the previously created figures.
+    - `parseProperties.m`: Parses a property-value list and check the values 
 respect some given constraints.
-    -strjoin.m: A MATLAB implementation of the function gluing strings 
+    -`strjoin.m`: A MATLAB implementation of the function gluing strings 
 together.
-    -stringSplit.m: A MATLAB imlementation if the function splitting 
+    -`stringSplit.m`: A MATLAB imlementation if the function splitting 
 strings at delimiter positions.
 
 
