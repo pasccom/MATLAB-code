@@ -23,6 +23,8 @@ together.
 strings at delimiter positions.
 - `iff.m`: A MATLAB implementation of the inline if constuct similar to
 C-based languages ternary operator.
+- `select.m`: Filters elements of a array (cell or numeric array) based on 
+a criterion.
 
 LICENSING INFORMATION
 ---------------------
