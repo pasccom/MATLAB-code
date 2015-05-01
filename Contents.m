@@ -7,3 +7,4 @@
 %    parseProperties - This function parses a property list.
 %    strjoin - Glue all string in cell with glue.
 %    stringSplit - Splits a string into parts according to delimiter.
+%    iff - Inline if constuct

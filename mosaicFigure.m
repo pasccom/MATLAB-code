@@ -1,5 +1,5 @@
 function newFigHandle = mosaicFigure(varargin)
-%MOSAICFIGURE Creates an auto-tiling figure.
+%% MOSAICFIGURE Creates an auto-tiling figure.
 % This function can be used to manage figure positions. It was created to
 % get around the fact that MATLAB always creates figures at the same
 % position. Figures can be grouped and assigned to a monitor (monitor 0
