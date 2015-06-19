@@ -41,7 +41,7 @@ function values = parseProperties(values, properties, varargin)
 % constraint.
 %		-max: The maximum value for this property. Use [] to remove the 
 % constraint.
-%		-...: The property-value list (Use vararagin{:} to forward).
+%   @param varargin: The property-value list (Use vararagin{:} to forward).
 %
 % Examples:
 %   % From mosaicFigure (see <a href="https://github.com/pasccom/MATLAB-code/blob/master/mosaicFigure.m">mosaicFigure</a>)
