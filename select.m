@@ -1,4 +1,4 @@
-function [subContainer] = select(fun, container, varargin)
+function [container] = select(fun, container, varargin)
 %% SELECT Select elements of a container matching a criterium.
 % Removes the elements which don't match a criterium given by some
 % function from a container.
@@ -34,8 +34,8 @@ function [subContainer] = select(fun, container, varargin)
 
     %% Checks arguments
     % Check container type
-    if (~iscell(container) && ~isnumeric(container))
-        error('MATLAB:BadArgument', 'This function supports only numeric arrays and cell arrays');
+    if (~iscell(container) && ~isnumeric(container) && ~isstruct(container) && ~ischar(container))
+        error('MATLAB:BadArgument', 'This function supports only numeric, cell, struct or char arrays');
     end
     % Check argument number
     if (nargin == 2)
@@ -52,13 +52,9 @@ function [subContainer] = select(fun, container, varargin)
     %% Initialisation of output container and type
     S = struct;
     if (iscell(container))
-        subContainer = cell(size(container));
         S.type = '{}';
-    elseif (isnumeric(container))
-        subContainer = zeros(size(container));
-        S.type = '()';
     else
-        error('MATLAB:BadArgument', 'This function supports only numeric arrays and cell arrays');
+        S.type = '()';
     end
     
     %% Initialisation of subs
@@ -73,8 +69,10 @@ function [subContainer] = select(fun, container, varargin)
         S.subs{dim} = i;
         item = subsref(container, S);
         if (fun(item))
-            S.subs{dim} = j;
-            subContainer = subsasgn(subContainer, S, item);
+            if (j ~= i)
+                S.subs{dim} = j;
+                container = subsasgn(container, S, item);
+            end
             j = j + 1;
         end
     end
@@ -83,6 +81,6 @@ function [subContainer] = select(fun, container, varargin)
     if (j <= size(container, dim))
         S.type = '()';
         S.subs{dim} = j:size(container, dim);
-        subContainer = subsasgn(subContainer, S, []);
+        container = subsasgn(container, S, []);
     end
 end
