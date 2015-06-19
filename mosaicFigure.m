@@ -374,7 +374,7 @@ function closeGroup(group)
 %   @param group A column structure array with the following fields:
 %       -handle: The handle to the corresponding figure.
 %       -screen: The screen ion which the figure must be displayed.
-    for f=1:size(group, 1)
+    for f=1:length(group)
         %set(group(f).handle, 'CloseRequestFcn', closereq);
         delete(group(f).handle);
     end
