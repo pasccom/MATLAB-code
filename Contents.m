@@ -9,3 +9,4 @@
 %    stringSplit - Splits a string into parts according to delimiter.
 %    iff - Inline if constuct
 %    select - Select elements of a container matching a criterium.
+%    slwho - List and locate all variables in MATLAB and Simulink

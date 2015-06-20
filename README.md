@@ -25,6 +25,7 @@ strings at delimiter positions.
 C-based languages ternary operator.
 - `select.m`: Filters elements of a array (cell or numeric array) based on 
 a criterion.
+- `slwho.m`: List and locate existing variables in MATLAB and Simulink.
 
 LICENSING INFORMATION
 ---------------------
