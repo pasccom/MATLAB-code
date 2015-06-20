@@ -39,9 +39,11 @@ function [container] = select(fun, container, varargin)
     end
     % Check argument number
     if (nargin == 2)
-        dim = find(size(container) ~= 1);
-        if (any(size(dim) ~= [1 1]))
+        dim = find(size(container) > 1);
+        if (any(size(dim) > [1 1]))
             error('MATLAB:BadArgument', 'When 2 arguments are passed the container should be essentialy of dimension one.');
+        elseif (isempty(dim))
+            dim = 1;
         end
     elseif (nargin == 3)
         dim = varargin{1};
