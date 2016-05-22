@@ -73,11 +73,15 @@ function newFigHandle = mosaicFigure(varargin)
         figList = {[]};
     end
     % Gets the positions of the monitors:
-    % They are refereced by the coordinates of the top-left and bottom 
-    % right points in the frame (O, u, v) where:
+    % In versions before 2014b, they are refereced by the coordinates of the
+    % top-left and bottom-right points in the frame (O, u, v), where:
     %   -O is the top-left point of the first monitor.
     %   -u is a vector oriented towards the left of the screen.
-    %   -v is a vectcor oriented towards the botton of the screen.
+    %   -v is a vectcor oriented towards the bottom of the screen.
+    % For version 2014b and after, they are referenced by the coordinates 
+    % of their lower-left points in the same frame (O, u, v') and their 
+    % width and height, where:
+    %   -v' is a vector oriented towards the top of the screen.
     monitorSizes = get(0, 'MonitorPositions');
     
     %% DEBUG CODE:
@@ -319,7 +323,7 @@ function newFigHandle = mosaicFigure(varargin)
     set(newFigHandle, 'CloseRequestFcn', {@closeMosaicFigure, group});
     set(newFigHandle, 'NumberTitle', 'off');
     set(newFigHandle, 'DockControls', 'off');
-    fig.handle = newFigHandle;
+    fig.handle = getNumberHandle(newFigHandle);
     fig.screen = monitor;
     
     %% Adds the new figure to figure list:
@@ -498,8 +502,13 @@ function [occ, area] = computeOccupation(n0, ns, screenSizes, handles)
         end
         % Compute best layout and occupation for this setting on this
         % screen.
-        w = screenSizes(1, 3) - screenSizes(1, 1) + 1;
-        h = screenSizes(1, 4) - screenSizes(1, 2) + 1;
+        if (versionNumber() < 2014.5)
+            w = screenSizes(1, 3) - screenSizes(1, 1) + 1;
+            h = screenSizes(1, 4) - screenSizes(1, 2) + 1;
+        else
+            w = screenSizes(1, 3);
+            h = screenSizes(1, 4);
+        end
         [~, ~, wf, hf] = handles.computeLayout(ns(1) + n, w, h);
         o = (wf*hf*(ns(1) + n))/w/h;
         if (o > 1)
@@ -810,7 +819,23 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HELPER FUNCTIONS :
 function noop(varargin)
-% NOOP Does nothing with any number of arguments.
+%% NOOP Does nothing with any number of arguments.
+end
+
+function v = versionNumber()
+%% VERSIONNUMBER Returns the version as a number
+% It is better to have the version as a number in code (for comparisons).
+% The returned number is equal to the year part, plus 1/2 if this ia a b
+% release.
+% Ex:
+%   On 2011a: 2011.0
+%   On 2014b: 2014.5
+%   @returns An number conveying MATLAB version.
+    ver = version('-release');
+    v = sscanf(ver(1:4), '%d');
+    if (ver(5) == 'b')
+        v = v + 0.5;
+    end
 end
 
 function path = getFilePath()
@@ -869,6 +894,20 @@ function str = group2str(group)
     end
 end
 
+function figNum = getNumberHandle(fig)
+%% FIGNUMBERHANDLE Creates a figure using the given arguments.
+% This function creates a figure using thee given arguments and returns the
+% number handle to it. This is strictly equivalent to the ficure command in
+% version 2001a.
+%   @params fig The figure created by figure.
+%   @return fig The number handle to the figure.
+    if (versionNumber() < 2014.5)
+        figNum = fig;
+    else
+        figNum = fig.Number;
+    end
+end
+
 function setFigureName(fig, varargin)
 %% SETFIGURENAME Appropriately sets the name of the figure.
 % This function can have two or three arguments:
@@ -917,14 +956,18 @@ function geom = correctGeometry(base, monitor)
 %   @param monitor: The monitor whose geometry to transform to new frame.
 %   @returns A 1x4 vector with the coordinates of the bottom-left corner of
 % the monitor, its width and its height.
-    w = monitor(3) - monitor(1) + 1;
-    h = monitor(4) - monitor(2) + 1;
-    hb = base(4) - base(2) + 1;
-    
-    x = monitor(1);
-    y = -(monitor(2) - 1) - h + hb + 1;
-    
-    geom = [x, y, w, h];
+    if (versionNumber() >= 2014.5)
+        % Geometries are OK from this version
+        geom = monitor;
+    else
+        w = monitor(3) - monitor(1) + 1;
+        h = monitor(4) - monitor(2) + 1;
+        hb = base(4) - base(2) + 1;
+        x = monitor(1);
+        y = -(monitor(2) - 1) - h + hb + 1;
+        
+        geom = [x, y, w, h];
+    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
