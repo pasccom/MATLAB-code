@@ -53,15 +53,16 @@ function newFigHandle = mosaicFigure(varargin)
     %% Properties:
     % Available properties:
     properties = struct( ...
-        'name', {'DealStrategy'; 'LayoutStrategy'; 'Title'}, ...
-        'type', {'integer'; 'integer'; 'char'}, ...
-        'size', {[1, 1]; [1, 1]; [1, 0]}, ...
-        'parse', {@parseDealStrategy; @parseLayoutStrategy; []}, ...
-        'min' , {1; 1; []}, ...
-        'max' , {3; 4; []} ...
+        'name', {'DealStrategy'; 'LayoutStrategy'; 'Title'; 'UseJava'}, ...
+        'type', {'integer'; 'integer'; 'char'; 'logical'}, ...
+        'size', {[1, 1]; [1, 1]; [1, 0]; [1, 1]}, ...
+        'parse', {@parseDealStrategy; @parseLayoutStrategy; []; @parseUseJava}, ...
+        'min' , {1; 1; []; []}, ...
+        'max' , {3; 4; []; []} ...
     );
     % Default settings:
     handles.title = [];
+    handles.getMonitorPositions = @getMonitorPositions;
     handles.dealFigures = @dealFigures3;
     handles.computeLayout = @computeLayout4;
     handles.initLayout = @noop;
@@ -82,7 +83,7 @@ function newFigHandle = mosaicFigure(varargin)
     % of their lower-left points in the same frame (O, u, v') and their 
     % width and height, where:
     %   -v' is a vector oriented towards the top of the screen.
-    monitorSizes = getMonitorPositions();
+    monitorSizes = handles.getMonitorPositions();
     
     %% DEBUG CODE:
     % Allows debuging by returning the state of the function:
@@ -312,9 +313,9 @@ function newFigHandle = mosaicFigure(varargin)
         % Relayout (refresh monitor positions because monitors may have
         % been added or disconnected
         if (g == 1)
-            layout(figList{1}, getMonitorPositions(), handles);
+            layout(figList{1}, handles.getMonitorPositions(), handles);
         else
-            layout(figList{g}.contents, getMonitorPositions(), handles);
+            layout(figList{g}.contents, handles.getMonitorPositions(), handles);
         end
     end
     
@@ -573,6 +574,19 @@ function handles = parseLayoutStrategy(handles, value)
 %   @return handles Handles to virtual functions. Field computeLayout has
 % been modified.
     handles.computeLayout = str2func(sprintf('computeLayout%d', value));
+end
+
+function handles = parseUseJava(handles, value)
+% PARSEUSEJAVA Parses the layout strategy
+% Assign the good layout strategy to obtain monitor positions.
+%   @param handles Handles to virtual functions. Field getMonitorPositions 
+% will be modified.
+%   @param value The number of the deal strategy to use.
+%   @return handles Handles to virtual functions. Field 
+% compgetMonitorPositions  has been modified.
+    if (~value)
+        handles.getMonitorPositions = @getMonitorPositions;
+    end 
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
