@@ -82,7 +82,7 @@ function newFigHandle = mosaicFigure(varargin)
     % of their lower-left points in the same frame (O, u, v') and their 
     % width and height, where:
     %   -v' is a vector oriented towards the top of the screen.
-    monitorSizes = get(0, 'MonitorPositions');
+    monitorSizes = getMonitorPositions();
     
     %% DEBUG CODE:
     % Allows debuging by returning the state of the function:
@@ -312,9 +312,9 @@ function newFigHandle = mosaicFigure(varargin)
         % Relayout (refresh monitor positions because monitors may have
         % been added or disconnected
         if (g == 1)
-            layout(figList{1}, get(0, 'MonitorPositions'), handles);
+            layout(figList{1}, getMonitorPositions(), handles);
         else
-            layout(figList{g}.contents, get(0, 'MonitorPositions'), handles);
+            layout(figList{g}.contents, getMonitorPositions(), handles);
         end
     end
     
@@ -438,9 +438,9 @@ function layout(group, screenSizes, varargin)
     
     %% Layout each screen
     f = 1;
-    handles.initLayout(correctGeometry(screenSizes(1, :), screenSizes(1, :)));
+    handles.initLayout(screenSizes(1, :));
     for m = 1:size(screenSizes, 1)
-        handles.layoutScreen([figs{m}; figs0(f:(f + deal(m) - 1))], correctGeometry(screenSizes(1, :), screenSizes(m, :)), handles, activate);
+        handles.layoutScreen([figs{m}; figs0(f:(f + deal(m) - 1))], screenSizes(m, :), handles, activate);
         f = f + deal(m);
     end
 end
@@ -502,13 +502,8 @@ function [occ, area] = computeOccupation(n0, ns, screenSizes, handles)
         end
         % Compute best layout and occupation for this setting on this
         % screen.
-        if (versionNumber() < 2014.5)
-            w = screenSizes(1, 3) - screenSizes(1, 1) + 1;
-            h = screenSizes(1, 4) - screenSizes(1, 2) + 1;
-        else
-            w = screenSizes(1, 3);
-            h = screenSizes(1, 4);
-        end
+        w = screenSizes(1, 3);
+        h = screenSizes(1, 4);
         [~, ~, wf, hf] = handles.computeLayout(ns(1) + n, w, h);
         o = (wf*hf*(ns(1) + n))/w/h;
         if (o > 1)
@@ -938,7 +933,14 @@ function setFigureName(fig, varargin)
     end
 end
 
-function geom = correctGeometry(base, monitor)
+function screenPositions = getMonitorPositions()
+%% GETMONITORPOSITIONS Gives the positions of the monitors.
+% This function corrects the positions returned by get(0, 'MonitorPositions'))
+% and returns them.
+    screenPositions = correctGeometry(get(0, 'MonitorPositions'));
+end
+
+function geom = correctGeometry(screenSizes)
 %% CORRECTGEOMETRY Gives the correct geometries for screens.
 % When accessed by get(0, 'MonitorPositions'), the given rectangles are
 % badly referenced for figure positionning. Indeed the frame origin is the
@@ -951,22 +953,24 @@ function geom = correctGeometry(base, monitor)
 % screen. The new frame has axes towards the right and the top of the
 % screen. The origin is the bottom left corner of the main screen. This is
 % what is convenient for positioning figures.
-%   @param base: The base screen geometry (as given by 
-% get(0, 'MonitorPositions'))
-%   @param monitor: The monitor whose geometry to transform to new frame.
+%   @param monitor: The monitor positions (as returned by get(0, 'MonitorPositions')).
 %   @returns A 1x4 vector with the coordinates of the bottom-left corner of
 % the monitor, its width and its height.
     if (versionNumber() >= 2014.5)
         % Geometries are OK from this version
-        geom = monitor;
+        geom = screenSizes;
     else
-        w = monitor(3) - monitor(1) + 1;
-        h = monitor(4) - monitor(2) + 1;
-        hb = base(4) - base(2) + 1;
-        x = monitor(1);
-        y = -(monitor(2) - 1) - h + hb + 1;
-        
-        geom = [x, y, w, h];
+        base = screenSizes(1, :);
+        geom = zeros(size(screenSizes));
+        for i = 1:size(screenSizes, 1)
+            w = screenSizes(i, 3) - screenSizes(i, 1) + 1;
+            h = screenSizes(i, 4) - screenSizes(i, 2) + 1;
+            hb = base(4) - base(2) + 1;
+            x = screenSizes(i, 1);
+            y = -(screenSizes(i, 2) - 1) - h + hb + 1;
+
+            geom(i, :) = [x, y, w, h];
+        end
     end
 end
 
