@@ -62,7 +62,7 @@ function newFigHandle = mosaicFigure(varargin)
     );
     % Default settings:
     handles.title = [];
-    handles.getMonitorPositions = @getMonitorPositions;
+    handles.getMonitorPositions = @getMonitorPositionsJava;
     handles.dealFigures = @dealFigures3;
     handles.computeLayout = @computeLayout4;
     handles.initLayout = @noop;
@@ -944,6 +944,30 @@ function setFigureName(fig, varargin)
         end
     else
         error('mosaicFigure:BadArgumentNumber', 'This function can handle between 1 and 3 arguments.');
+    end
+end
+
+function screenPositions = getMonitorPositionsJava()
+%% GETMONITORPOSITIONS Gives the positions of the monitors using Java methods.
+% This function corrects the positions returned by Java AWT methods
+% and returns them.
+    graphicsEnv = javaMethod('getLocalGraphicsEnvironment', 'java.awt.GraphicsEnvironment');
+    screenDevices = javaMethod('getScreenDevices', graphicsEnv);
+    screenPositions = zeros(length(screenDevices), 4);
+    base = [];
+    for d = 1:length(screenDevices)
+        graphicsConfs = javaMethod('getConfigurations', screenDevices(d));
+        % ASSERT length(graphicsConfs) == 1 ...
+        bounds = javaMethod('getBounds', graphicsConfs(1));
+        if (isempty(base))
+            base = [bounds.x, bounds.y, bounds.width, bounds.height];
+            screenPositions(d, :) = [1, 1, bounds.width, bounds.height];
+        else
+            x = bounds.x + 1;
+            y = -bounds.y - bounds.height + base(4) + 1;
+
+            screenPositions(d, :) = [x, y, bounds.width, bounds.height];
+        end
     end
 end
 
