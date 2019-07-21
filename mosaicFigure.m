@@ -323,8 +323,8 @@ function newFigHandle = mosaicFigure(varargin)
     set(newFigHandle, 'CloseRequestFcn', {@closeMosaicFigure, group});
     set(newFigHandle, 'NumberTitle', 'off');
     set(newFigHandle, 'DockControls', 'off');
-    fig.handle = getNumberHandle(newFigHandle);
-    fig.screen = monitor;
+    fig = struct('handle', getNumberHandle(newFigHandle), ...
+                 'screen', monitor);
     
     %% Adds the new figure to figure list:
     g = findGroup(group, figList);
