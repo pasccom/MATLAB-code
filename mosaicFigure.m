@@ -27,6 +27,13 @@ function newFigHandle = mosaicFigure(varargin)
 % they work. 
 %
 % Special commands:
+%   mosaicFigure layout
+%   Relayout the figures with no assigned group.
+%   mosaicFigure layout groupNumber
+%   Relayout the group with number groupNumber
+%   mosaicFigure layout groupName
+%   Relayout the group named groupName
+%
 %   mosaicFigure close
 %   mosaicFigure close all
 %   Closes all the figures managed by mosaicFigure.
@@ -119,6 +126,41 @@ function newFigHandle = mosaicFigure(varargin)
     end
     
     %% Command parsing:
+    % The layout command:
+    if ((nargin >= 1) && strcmp(varargin{1}, 'layout'))
+        % Argument parsing:
+        if(nargin < 2)
+            group = [];
+        else
+            group = varargin{2};
+        end
+        if (~isempty(group) && isnumeric(group) && (round(group) == group))
+            group = int64(group);
+        elseif (ischar(group) && ~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
+            group = int64(sscanf(group, '%d'));
+        end
+        if (~isempty(group) && ~ischar(group) && ~isinteger(group))
+            error('MATLAB:BadArgumentType', ...
+                  'Group names must be integers or chars');
+        end
+        if (ischar(group) && strcmp(group, 'all'))
+            error('MATLAB:BadArgumentValue', ...
+                  'The group name "all" is a reserved group name and should not be used');
+        end
+        % If the fig list has been reset, try recover from backup:
+        if ((size(figList, 1) == 1) && isempty(figList{1}))
+            backup = load([tempdir, 'figList.mat']);
+            figList = backup.figList;
+        end
+        % Relayout:
+        g = findGroup(group, figList);
+        if (isempty(g) || (g == 1))
+            layout(figList{1}, monitorSizes, handles);
+        else
+            layout(figList{g}.contents, monitorSizes, handles, true);
+        end
+        return
+    end
     % The close command:
     if ((nargin >= 1) && strcmp(varargin{1}, 'close'))
         % Argument parsing:
