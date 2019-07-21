@@ -259,9 +259,9 @@ function newFigHandle = mosaicFigure(varargin)
             end
         else
             % Possible answers:
-            all = 'all';
-            one = 'one';
-            cancel = 'cancel';
+            ALL = 'all';
+            ONE = 'one';
+            CANCEL = 'cancel';
             % The name of the group as a string:
             groupname = [];
             if (ischar(group))
@@ -273,16 +273,16 @@ function newFigHandle = mosaicFigure(varargin)
             if (size(figList{gr}.contents, 1) > 1)
                 rep = questdlg(['You are closing figure of group "', groupname, '". Do you want to close the whole group or only this figure?'], ...
                                ['Closing group "', groupname, '"'], ...
-                               all, one, cancel, all);
+                               ALL, ONE, CANCEL, ALL);
             else
-                rep = all;
+                rep = ALL;
             end
             % If cancel was chosen, returns:
-            if (strcmp(rep, cancel))
+            if (strcmp(rep, CANCEL))
                 return;
             end
             % Clears wanted figures:
-            all = strcmp(rep, all);
+            all = strcmp(rep, ALL);
             for f=size(figList{gr}.contents, 1):-1:0
                 if (f == 0)
                     % Ensure the figure has been deleted.
