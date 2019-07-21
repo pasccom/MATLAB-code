@@ -37,6 +37,8 @@ function newFigHandle = mosaicFigure(varargin)
 %   mosaicFigure close
 %   mosaicFigure close all
 %   Closes all the figures managed by mosaicFigure.
+%   mosaicFigure closes groupNumber
+%   Closes all the figures in the group number groupNumber
 %   mosaicFigure closes groupName
 %   Closes all the figures in the group named groupName
 %   
@@ -79,6 +81,10 @@ function newFigHandle = mosaicFigure(varargin)
     persistent figList
     if(isempty(figList))
         figList = {[]};
+    end
+    persistent silentClose
+    if(isempty(silentClose))
+        silentClose = false;
     end
     % Gets the positions of the monitors:
     % In versions before 2014b, they are refereced by the coordinates of the
@@ -174,10 +180,17 @@ function newFigHandle = mosaicFigure(varargin)
                     ['MosaicFigure close command only needs 1 argument.', ...
                     'Others will be ignored']);
         end
-        if (isnumeric(group) && (round(group) == group))
-            group = int64(group);
-        elseif (ischar(group) && ~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
+        if (ischar(group) && ~isempty(regexp(group, '^[1-9][0-9]*$', 'once')))
             group = int64(sscanf(group, '%d'));
+        elseif (isnumeric(group) && (round(group) == group))
+            group = int64(group);
+        elseif (isa(group, 'matlab.ui.Figure') || isempty(group))
+            silentClose = true;
+            for fig = 1:length(group)
+                close(fig);
+            end
+            silentClose = false;
+            return;
         end
         if (~ischar(group) && ~isinteger(group))
             error('MATLAB:BadArgumentType', ...
@@ -312,12 +325,12 @@ function newFigHandle = mosaicFigure(varargin)
                 groupname = sprintf('%d', group);
             end
             % Ask only if there is more than one window in group:
-            if (size(figList{gr}.contents, 1) > 1)
+            if (~silentClose && (size(figList{gr}.contents, 1) > 1))
                 rep = questdlg(['You are closing figure of group "', groupname, '". Do you want to close the whole group or only this figure?'], ...
                                ['Closing group "', groupname, '"'], ...
                                ALL, ONE, CANCEL, ALL);
             else
-                rep = ALL;
+                rep = ONE;
             end
             % If cancel was chosen, returns:
             if (strcmp(rep, CANCEL))
