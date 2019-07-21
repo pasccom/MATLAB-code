@@ -29,9 +29,9 @@ function newFigHandle = mosaicFigure(varargin)
 % Special commands:
 %   mosaicFigure close
 %   mosaicFigure close all
-%   Closes all the figures managed by mosaidFigure.
+%   Closes all the figures managed by mosaicFigure.
 %   mosaicFigure closes groupName
-%   Closes all the figures in the group named groupname
+%   Closes all the figures in the group named groupName
 %   
 %   Can also be used under function form.
 %
