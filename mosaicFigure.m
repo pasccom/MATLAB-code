@@ -282,7 +282,6 @@ function newFigHandle = mosaicFigure(varargin)
                 return;
             end
             % Clears wanted figures:
-            all = strcmp(rep, ALL);
             for f=size(figList{gr}.contents, 1):-1:0
                 if (f == 0)
                     % Ensure the figure has been deleted.
@@ -292,10 +291,10 @@ function newFigHandle = mosaicFigure(varargin)
                     end
                     break;
                 end
-                if (all || (figList{gr}.contents(f).handle == src))
+                if (strcmp(rep, ALL) || (figList{gr}.contents(f).handle == src))
                     delete(figList{gr}.contents(f).handle);
                     figList{gr}.contents(f) = [];
-                    if (~all)
+                    if (~strcmp(rep, ALL))
                         break;
                     end
                 end
