@@ -599,7 +599,7 @@ function layoutScreen(figs, screenSize, handles, activate)
             h0 = floor((nl - l)*screenSize(4)/nl);
             h1 = floor((nl - l + 1)*screenSize(4)/nl);
             if (~strcmp(get(figs((l - 1)*nc + c), 'WindowStyle'), 'docked'))
-                set(figs((l - 1)*nc + c), 'OuterPosition', [screenSize(1) + w0, screenSize(2) + h0, w1 - w0, h1 - h0]);
+                set(figs((l - 1)*nc + c), 'OuterPosition', correctOuterPosition([screenSize(1) + w0, screenSize(2) + h0, w1 - w0, h1 - h0]));
                 if (activate)
                     figure(figs((l - 1)*nc + c));
                 end
@@ -903,6 +903,25 @@ function v = versionNumber()
     end
 end
 
+function v = windowsVersionNumber()
+%% WINDOWSVERSIONNUMBER Returns the version of Windows as a number
+% It is better to have the version as a number in code (for comparisons).
+% The returned number is equal to the major number of Windows release.
+% Ex:
+%   On Windows 7: 7
+%   On Windows 10: 10
+%   @returns An number conveying MATLAB version.
+    v = nan;
+    [status, verStr] = system('ver');
+    if (status == 0)
+        verStr = strtrim(verStr);
+        match = regexp(verStr, '^Microsoft Windows \[version (\d+)(?:\.\d+)*\]$', 'tokens');
+        if ~isempty(match)
+            v = sscanf(match{1}{1}, '%d');
+        end
+    end
+end
+
 function path = getFilePath()
 %% GETFILEPATH Get the file path.
 %   @return path The path to the *.m file.
@@ -1068,6 +1087,21 @@ function geom = correctGeometry(screenSizes)
     end
 end
 
+function pos = correctOuterPosition(pos)
+%% CORRECTOUTERPOSITION Corrects the outer position depending on Windows version.
+% On Windows 8, the window borders were removed, but this has never been taken into account by MATLAB: When
+% setting a figure with the screen size as the OuterPosition, there are a few pixels lost.
+% This function corrects the given outer position so that no pixel are lost.
+%   @param pos The desired outer position.
+%   @returns The position corrected so that when using OuterPosition the effective position is as desired.
+    if (windowsVersionNumber() > 7)
+        pos(1) = pos(1) - 8;
+        pos(2) = pos(2) - 8;
+        pos(3) = pos(3) + 15;
+        pos(4) = pos(4) + 8;
+    end
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DEBUGGING FUNCTIONS :
 function initLayoutDebug(screenSize)
@@ -1076,7 +1110,7 @@ function initLayoutDebug(screenSize)
 % drawn on a figures instead of creating figures.
 %   @param screenSize The size of the screen (correctGeometry must have
 % been applied).
-    figure('OuterPosition', screenSize);
+    figure('OuterPosition', correctOuterPosition(screenSize));
 end
 
 function layoutScreenDebug(figs, screenSize, handles, activate)
