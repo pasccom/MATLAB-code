@@ -576,7 +576,7 @@ function layoutScreen(figs, screenSize, handles, activate)
 %   @param figs A column cell array containing the handles to the figures
 % to assign to the screen.
 %   @param screenSize The size of the screen being laid out
-% (correctGeometry mus have been used before).
+% (correctGeometry must have been used before).
 %   @param handles Handles to virtual functions (used for debugging and 
 % choosing the layout strategy).
 %   @param activate Whether to activate the figure after laying out or not.
@@ -588,20 +588,22 @@ function layoutScreen(figs, screenSize, handles, activate)
     
     %% Computing layout:
     n = size(figs, 1);
-    [~, nc, wf, ~] =  handles.computeLayout(n, screenSize(3), screenSize(4));
+    [~, nc, ~, ~] =  handles.computeLayout(n, screenSize(3), screenSize(4));
     
     %% Doing layout:
     for c=1:nc
+        w0 = floor((c - 1)*screenSize(3)/nc);
+        w1 = floor(c*screenSize(3)/nc);
         nl = ceil((n - c + 1)/nc);
-        hf = floor((screenSize(4) + 1)/nl);
         for l = 1:nl
+            h0 = floor((nl - l)*screenSize(4)/nl);
+            h1 = floor((nl - l + 1)*screenSize(4)/nl);
             if (~strcmp(get(figs((l - 1)*nc + c), 'WindowStyle'), 'docked'))
-                set(figs((l - 1)*nc + c), 'OuterPosition', [screenSize(1) + (c - 1)*wf, screenSize(2) + (nl - l)*hf, wf, hf]);
+                set(figs((l - 1)*nc + c), 'OuterPosition', [screenSize(1) + w0, screenSize(2) + h0, w1 - w0, h1 - h0]);
                 if (activate)
                     figure(figs((l - 1)*nc + c));
                 end
             end
-            
         end
     end
 end
@@ -1087,7 +1089,7 @@ function layoutScreenDebug(figs, screenSize, handles, activate)
 %   @param handles Handles to virtual functions (used to choose layout and
 % deal strategy).
 %   @param activate Wether to activate the figure or not. Activated figures
-% are represented by a red rectangle where as normal figures are
+% are represented by a red rectangle whereas normal figures are
 % represented by a green rectangle.
 
     % Initialising layout:
@@ -1100,18 +1102,21 @@ function layoutScreenDebug(figs, screenSize, handles, activate)
     
     % Computing the optimal layout:
     n = size(figs, 1);
-    [~, nc, wf, ~] = handles.computeLayout(n, screenSize(3), screenSize(4));
+    [~, nc, ~, ~] = handles.computeLayout(n, screenSize(3), screenSize(4));
     
     % Doing layout:
     for c=1:nc
+        w0 = floor((c - 1)*screenSize(3)/nc);
+        w1 = floor(c*screenSize(3)/nc);
         nl = ceil((n - c + 1)/nc);
-        hf = floor((screenSize(4) + 1)/nl);
         for l = 1:nl
+            h0 = floor((nl - l)*screenSize(4)/nl);
+            h1 = floor((nl - l + 1)*screenSize(4)/nl);
             if (~strcmp(get(figs((l - 1)*nc + c), 'WindowStyle'), 'docked'))
                 if (activate)
-                    rectangle('Position', [screenSize(1) + (c - 1)*wf, screenSize(2) + (nl - l)*hf, wf, hf], 'EdgeColor', [1 0 0]);
+                    rectangle('Position', [screenSize(1) + w0, screenSize(2) + h0, w1 - w0, h1 - h0], 'EdgeColor', [1 0 0]);
                 else
-                    rectangle('Position', [screenSize(1) + (c - 1)*wf, screenSize(2) + (nl - l)*hf, wf, hf], 'EdgeColor', [0 1 0]);
+                    rectangle('Position', [screenSize(1) + w0, screenSize(2) + h0, w1 - w0, h1 - h0], 'EdgeColor', [0 1 0]);
                 end 
             end
         end
