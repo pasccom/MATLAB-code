@@ -80,7 +80,7 @@ function newFigHandle = mosaicFigure(varargin)
     %% Initialisation:
     persistent figList
     if(isempty(figList))
-        figList = {[]};
+        figList = loadBackup();
     end
     persistent silentClose
     if(isempty(silentClose))
@@ -155,8 +155,7 @@ function newFigHandle = mosaicFigure(varargin)
         end
         % If the fig list has been reset, try recover from backup:
         if ((size(figList, 1) == 1) && isempty(figList{1}))
-            backup = load([tempdir, 'figList.mat']);
-            figList = backup.figList;
+            figList = loadBackup();
         end
         % Relayout:
         g = findGroup(group, figList);
@@ -198,8 +197,7 @@ function newFigHandle = mosaicFigure(varargin)
         end
         % If the fig list has been reset, try recover from backup:
         if ((size(figList, 1) == 1) && isempty(figList{1}))
-            backup = load([tempdir, 'figList.mat']);
-            figList = backup.figList;
+            figList = loadBackup();
         end
         % Closes the figures:
         if (strcmp(group, 'all'))
@@ -210,7 +208,7 @@ function newFigHandle = mosaicFigure(varargin)
                     closeGroup(figList{g}.contents);
                 end
             end
-            figList = {};
+            figList = {[]};
         else
             g = findGroup(group, figList);
             if (isempty(g))
@@ -222,6 +220,7 @@ function newFigHandle = mosaicFigure(varargin)
                 figList(g) = [];
             end
         end
+        saveBackup(figList);
         return
     end
     
@@ -282,8 +281,7 @@ function newFigHandle = mosaicFigure(varargin)
         catch e %#ok I don't want information on an error in findgroup
             % The listof figures has probably been cleared out:
             % Tries to recover from backup.
-            backup = load([tempdir, 'figList.mat']);
-            figList = backup.figList;
+            figList = loadBackup();
             try
                 gr = findGroup(group, figList);
             catch e %#ok I don't want information on an error in findgroup
@@ -357,12 +355,12 @@ function newFigHandle = mosaicFigure(varargin)
             % If group is empty, then remove it:
             if (isempty(figList{gr}.contents))
                 figList(gr) = [];
-                save([tempdir, 'figList.mat'], 'figList');
+                saveBackup(figList);
                 return;
             end
         end
         % Saves figure list:
-        save([tempdir, 'figList.mat'], 'figList');
+        saveBackup(figList);
         
         % Relayout (refresh monitor positions because monitors may have
         % been added or disconnected
@@ -409,7 +407,8 @@ function newFigHandle = mosaicFigure(varargin)
         else
             setFigureName(newFigHandle, size(oldGroup.contents, 1), group);
         end
-    end        
+    end
+    saveBackup(figList);
     
     %% Relayout:
     if (g == 1)
@@ -420,9 +419,6 @@ function newFigHandle = mosaicFigure(varargin)
     
     %% Ensures the new figure is the active figure:
     figure(newFigHandle);
-    
-    %% Saves figure list:
-    save([tempdir, 'figList.mat'], 'figList');
 end
 
 function closeGroup(group)
@@ -1099,6 +1095,39 @@ function pos = correctOuterPosition(pos)
         pos(2) = pos(2) - 8;
         pos(3) = pos(3) + 15;
         pos(4) = pos(4) + 8;
+    end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% BACKUP FUNCTIONS :
+function saveBackup(figList)
+%% SAVEBACKUP Saves the figure list
+% In case the figure list gets cleared (for instance by issuing`clear all`).
+% This functions makes an on-disk backup of the figure list so that it can
+% be retrieved later.
+%   @param figList Current figure list
+%   @sa loadBackup()
+    backupPath = [tempdir, 'figList.mat'];
+    try
+        save(backupPath, 'figList');
+    catch anyErr %#ok<NASGU>
+        warning('Could not save figure list in backup file "%s"', backupPath);
+    end
+end
+
+function figList = loadBackup()
+%% LOADBACKUP Loads the figure list from backup
+% Sometimes the figure list is cleared (for instance by issuing`clear all`).
+% When this happens it can be restored from an on disk backup using this
+% function.
+%   @returns the figure list from the backup
+%   @sa saveBackup()
+    backupPath = [tempdir, 'figList.mat'];
+    try
+        backup = load(backupPath);
+        figList = backup.figList;
+    catch anyErr %#ok<NASGU>
+        figList = {[]};
     end
 end
 
