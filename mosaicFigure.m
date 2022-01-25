@@ -431,7 +431,9 @@ function closeGroup(group)
 %       -screen: The screen ion which the figure must be displayed.
     for f=1:length(group)
         %set(group(f).handle, 'CloseRequestFcn', closereq);
-        delete(group(f).handle);
+        if (ishandle(group(f).handle) && isvalid(group(f).handle))
+            delete(group(f).handle);
+        end
     end
 end
 
