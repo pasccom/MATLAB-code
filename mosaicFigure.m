@@ -461,6 +461,9 @@ function layout(group, screenSizes, varargin)
     else
         activate = false;
     end
+
+    %% Filter out invisible figures (especially the ones created by live scripts)
+    group = group(arrayfun(@(fig) get(fig.handle, 'Visible'), group));
     if (isempty(group))
         return;
     end
