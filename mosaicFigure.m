@@ -273,7 +273,7 @@ function newFigHandle = mosaicFigure(varargin)
         monitor = 0;
     end
     
-    %% Handler of closing events for the figures:
+    %% Handler of close events for the figures:
     function closeMosaicFigure(src, ~, group)
         % Find the group number of the figure being deleted:
         try
@@ -364,10 +364,10 @@ function newFigHandle = mosaicFigure(varargin)
         
         % Relayout (refresh monitor positions because monitors may have
         % been added or disconnected
-        if (g == 1)
+        if (gr == 1)
             layout(figList{1}, handles.getMonitorPositions(), handles);
         else
-            layout(figList{g}.contents, handles.getMonitorPositions(), handles);
+            layout(figList{gr}.contents, handles.getMonitorPositions(), handles);
         end
     end
     
