@@ -28,18 +28,32 @@ function [parts] = stringSplit(string, delimiter)
 % License:  GPLv3
 % Requires: 
 
-
-    % Checks the size of the delimiter:
+    %% Check arguments
+    % Check the type of the string
+    if ~ischar(string)
+        error('StringSplit:InvalidArgument', 'String must be a char array');
+    end
+    % Check the type of the delimiter
+    if ~ischar(delimiter)
+        error('StringSplit:InvalidArgument', 'Delimiter must be a char array');
+    end
+    % Check the size of the delimiter
     if(any(size(delimiter) ~= [1, 1]))
-        error('The delimiter is expected to be 1x1');
+        error('StringSplit:InvalidArgument', 'Delimiter must be 1x1');
     end
     
+    %% Find delimiters
     splits = find(string==delimiter);
     splits = [0, splits, size(string, 2) + 1];
     
+    %% Split the string
     parts = cell(size(splits, 2) - 1, 1);
     for s=2:size(splits, 2)
-        parts{s - 1} = string((splits(s - 1) + 1):(splits(s) - 1));
+        if (splits(s - 1) + 1 <= splits(s) - 1)
+            parts{s - 1} = string((splits(s - 1) + 1):(splits(s) - 1));
+        else
+            parts{s - 1} = '';
+        end
     end
 end
 
