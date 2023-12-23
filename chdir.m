@@ -1,30 +1,40 @@
 function varargout = chdir(path, varargin)
-%% CHDIR Equivent to cd with a history.
+% @brief `cd` with a history.
+%
 % This command is equivalent to cd in all cases except when the path is
 % '-'. In this case it goes back to the previously visited directory.
-% This function is very useful in initialisation functions of models (see
+% This function is very useful in initialization functions of models (see
 % example below).
-%   @param path The path to change to.
+% @param path The path to change to
+% @param varargin Optional debug arguments
+% @return Nothing (except with debug arguments)
 %
-% This function keeps a stack of visited directories which can be
-% obtained by sending 'Debug' as second argument.
+% @note This function keeps a stack of visited directories which can be
+% obtained by sending `'Debug'` as second argument.
 %
-% Examples:
-%   chdir('Folder'); % Now in ./Folder directory
-%   chdir('-'); % Returns in initial directory.
-%
+% \par Examples
+% Change to `./Folder` directory
+% \code{.m}
+%   chdir('Folder');
+% \endcode
+% Returns in initial directory
+% \code{.m}
+%   chdir('-');
+% \endcode
+% Usage in model initialization functions
+% \code{.m}
 %   [modelPath, ~, ~] = fileparts(which(gcs));
 %   chdir(modelPath);
 %   % Model initialisation code.
 %   chdir('-');
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
+% % Copyright 2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:   Pascal COMBES <pascom@orange.fr>
+% % Date:     December 23rd, 2023
+% % Version:  1.0
+% % License:  GPLv3
+% % Requires:
 
     persistent oldPwd
     if isempty(oldPwd)
