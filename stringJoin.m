@@ -1,38 +1,53 @@
 function [str] = stringJoin(strings, glue)
-%% STRJOIN Glue all string in cell with glue.
-% This function can handle one or two arguments. The first one is the parts
-% of strings and the second which is optional is the glue. It the second
-% argument is not provided the parts will be glued with the empty string.
-%   @param parts Parts of the string as a cell array of strings or a
-% string.
-%   @param glue Optionnal. The glue to use to glue the parts together.
-%   @return str A string composed of all the parts gued together using the
+% @brief Glue strings in a cell array
+%
+% Merges a cell array of char into a single char array, using optionnally
+% a glue, given as a char array.
+% @param strings The strings to be merged as a cell array of char.
+% @param glue Optionnal glue to be used between two strings
+% (but not before the first one and after the last one)
+% @return A string composed of all the parts gued together using the
 % provided glue string.
 %
-% Examples:
+% \par Examples
+% A single string is not modified
+% \code
 %   parts = 'a';
 %   str = strjoin(parts)
 %   str = 'a'
-%
+% \endcode
+% even if glue is provided
+% \code
 %   parts = 'a';
 %   str = strjoin(parts, ',')
 %   str = 'a'
-%
+% \endcode
+% When no glue is provided, strings are simply stuck together
+% \code
+%   parts = {'a', 'b', 'c', 'd', 'e', 'f'};
+%   str = strjoin(parts)
+%   str = 'abcdef'
+% \endcode
+% When glue is provided, it is inserted between each part
+% \code
 %   parts = {'a', 'b', 'c', 'd', 'e', 'f'};
 %   str = strjoin(parts, ',')
 %   str = 'a,b,c,d,e,f'
+% \endcode
+% Glue can even be multiple char long
+% \code
 %   parts = {'a', 'b', 'c', 'd', 'e', 'f'};
 %   str = strjoin(parts, ', ')
 %   str = 'a, b, c, d, e, f'
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
-  
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 23rd, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
+
     %% Checking arguments
     % Stop here if there is nothing to join
     if(isempty(strings))
