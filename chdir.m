@@ -27,37 +27,43 @@ function varargout = chdir(path, varargin)
 % Requires: 
 
     persistent oldPwd
+    if isempty(oldPwd)
+        oldPwd = {};
+    end
     
-    % Special second argument for debugging:
+    % Special second argument for debugging
     if ((nargin == 2) && strcmp(varargin{1}, 'Debug'))
         varargout = {oldPwd};
         return;
     end
     
-    % Argument number checking:
+    % Argument number checking
     if (nargin ~= 1)
-        error('MATLAB:BadArgumentNumber', 'This function accepts only one argument. %d were passed.', nargin);
+        error('chdir:BadArgumentNumber', 'This function accepts only one argument. %d were passed.', nargin);
     end
     if (nargout ~= 0)
-        error('MATLAB:BadArgumentNumber', 'This function doesn''t return any argument. %d were asked.', nargout);
+        error('chdir:BadArgumentNumber', 'This function doesn''t return any argument. %d were asked.', nargout);
     end
     
     if (strcmp(path, '-'))
-        % Go to previously visited directory:
+        % Go to previously visited directory
         if (isempty(oldPwd))
-            warning('MATLAB:NoHistory', 'No saved directory.')
+            warning('chdir:NoHistory', 'No saved directory.')
         else
             cd(oldPwd{end});
             oldPwd(end) = [];
         end
-    else
-        % Try to go to directory.
+    elseif (~strcmp(path, '.')  && ~strcmp(path, pwd))
+        % Try to go to directory
         try
             oldPwd = [oldPwd, {pwd}];
             cd(path);
         catch anyErr
-            % Fail if directory does not exist. 
-            oldPwd(end) = []; %#ok False positive.
+            % Fail if directory does not exist
+            oldPwd(end) = [];
+            if strcmp(anyErr.identifier, 'MATLAB:cd:NonExistentFolder')
+                error('chdir:NonExistentFolder', 'Unable to change current folder to "%s"', path);
+            end
             rethrow(anyErr);
         end
     end
