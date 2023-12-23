@@ -1,32 +1,38 @@
 function [parts] = stringSplit(string, delimiter)
-%% STRINGSPLIT Splits a string into parts according to delimiter.
-%   @param string The string to split.
-%   @param delimiter The delimiter for parts of the splitted string.
-%   @return parts A column cell array containing the string splitted
-% according to the delimiter.
+% @brief Split a string
 %
-% Examples:
+% Split the given string into multiple parts according to the given
+% delimiter.
+% @param string The string to split
+% @param delimiter The delimiter for substrings in the given string
+% @return A column cell array containing the substrings
+%
+% \par Examples
+% Split a string according to the given delimiter
+% \code
 %   str = '1,2,3';
 %   parts = stringSplit(str, ',')
 %   parts =
 %       '1'
 %       '2'
 %       '3'
-%
+% \endcode
+% The presence of other possible delimiter does not impact splitting
+% \code
 %   str = '(a;1),(b;2),(c;3)';
 %   parts = stringSplit(str, ',')
 %   parts =
 %       '(a;1)'
 %       '(b;2)'
 %       '(c;3)'
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
+% % Copyright 2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:   Pascal COMBES <pascom@orange.fr>
+% % Date:     December 23rd, 2023
+% % Version:  1.0
+% % License:  GPLv3
+% % Requires:
 
     %% Check arguments
     % Check the type of the string
