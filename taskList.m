@@ -24,6 +24,13 @@ function tasks = taskList(detailed, varargin)
 %   - \c 'UserName', the process user name
 %   - \c 'CpuTime', the time the process consumed
 %   - \c 'WindowTitle', the windows title
+%
+% % Copyright:  2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 22nd, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
 
     % Argument processing
     if (nargin < 1)

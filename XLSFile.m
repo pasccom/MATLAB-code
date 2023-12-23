@@ -14,6 +14,14 @@ classdef XLSFile < handle
 %   - `xlsFile.otherSheet{bl:el, bc:ec}` Access range at (bl, bc):(el, ec) in sheet *otherSheet* as a matrix
 %
 % @note Line and column numbering starts at 1
+%
+% % Copyright:  2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 22nd, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
+
     properties(Dependent)
         IsOpen      %< Whether an XLS workbook is open
         ActiveSheet %< The name of the active sheet (empty if no workbook is opened)
