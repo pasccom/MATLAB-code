@@ -3,11 +3,14 @@ function [str] = stringJoin(strings, glue)
 %
 % Merges a cell array of char into a single char array, using optionnally
 % a glue, given as a char array.
+% @deprecated As of MATLAB R2013a, `strsplit()` should preferably be used
+% (the MATLAB function is more efficient and supports MATLAB strings).
 % @param strings The strings to be merged as a cell array of char.
 % @param glue Optionnal glue to be used between two strings
 % (but not before the first one and after the last one)
 % @return A string composed of all the parts gued together using the
 % provided glue string.
+% @sa stringSplit()
 %
 % \par Examples
 % A single string is not modified

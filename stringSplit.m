@@ -3,9 +3,12 @@ function [parts] = stringSplit(string, delimiter)
 %
 % Split the given string into multiple parts according to the given
 % delimiter.
+% @deprecated As of MATLAB R2013a, `strsplit()` should preferably be used
+% (the MATLAB function is more efficient and supports MATLAB strings).
 % @param string The string to split
 % @param delimiter The delimiter for substrings in the given string
 % @return A column cell array containing the substrings
+% @sa stringJoin()
 %
 % \par Examples
 % Split a string according to the given delimiter
