@@ -1,4 +1,4 @@
-function [str] = stringJoin(varargin)
+function [str] = stringJoin(strings, glue)
 %% STRJOIN Glue all string in cell with glue.
 % This function can handle one or two arguments. The first one is the parts
 % of strings and the second which is optional is the glue. It the second
@@ -32,54 +32,50 @@ function [str] = stringJoin(varargin)
 % Version:  1.0.0
 % License:  GPLv3
 % Requires: 
-    
-    if(nargin == 0)
-        error('strjoin needs at least one argument');
-    end
-    cell = varargin{1};
-    glue = '';
-    if(nargin > 1)
-        glue = varargin{2};
-    end
-    if(nargin > 2)
-        warning('This function needs only 2 arguments other will be ignored');
-    end
-
-    totalLength = 0;
-    if(~iscell(cell))
-        cell = {cell};
-    end
-    if(isempty(cell))
+  
+    %% Checking arguments
+    % Stop here if there is nothing to join
+    if(isempty(strings))
         str = '';
         return;
     end
-    if((size(cell, 1) ~= 1) && (size(cell, 2) ~= 1))
-        error('StringJoin:InvalidArgument', 'Cell should be either a row or a column cell array');
+    % Default value for glue
+    if(nargin < 2)
+        glue = '';
     end
-    for i = 1:max(size(cell))
-        if(~ischar(cell{i}))
-            error('StringJoin:InvalidArgument', 'Cell should be a cell array of strings');
-        end
-        totalLength = totalLength + size(cell{i}, 2);
-    end
-    
+    % Checking glue type
     if (~ischar(glue))
         error('StringJoin:InvalidArgument', 'Glue is expected to be of type char');
     end
-    
-    totalLength = totalLength + (max(size(cell)) - 1)*size(glue, 2);
+    % Ensure strings is a cell array
+    if(~iscell(strings))
+        strings = {strings};
+    end
+    % Check that string is a column or a row cell array
+    if((size(strings, 1) ~= 1) && (size(strings, 2) ~= 1))
+        error('StringJoin:InvalidArgument', 'Cell should be either a row or a column cell array');
+    end
 
-    str = zeros(1, totalLength);
-    
+    %% Compute total length
+    totalLength = 0;
+    for i = 1:max(size(strings))
+        % Also check that the elements of strings are char arrays
+        if(~ischar(strings{i}))
+            error('StringJoin:InvalidArgument', 'Cell should be a cell array of strings');
+        end
+        totalLength = totalLength + size(strings{i}, 2);
+    end
+    totalLength = totalLength + (max(size(strings)) - 1)*size(glue, 2);
+
+    %% Merge strings
+    str = char(zeros(1, totalLength));
     j = 1;
-    for i = 1:(max(size(cell)) - 1)
-        str(j:(j + size(cell{i}, 2) - 1)) = cell{i};
-        j = j + size(cell{i}, 2);
+    for i = 1:(max(size(strings)) - 1)
+        str(j:(j + size(strings{i}, 2) - 1)) = strings{i};
+        j = j + size(strings{i}, 2);
         str(j:(j + size(glue, 2) - 1)) = glue;
         j = j + size(glue, 2);
     end
-    str(j:(j + size(cell{end}, 2) - 1)) = cell{end};
-    
-    str = char(str);
+    str(j:(j + size(strings{end}, 2) - 1)) = strings{end};
 end
 
