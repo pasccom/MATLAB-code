@@ -327,6 +327,29 @@ classdef TestChdir < matlab.unittest.TestCase
             self.verifyEqual(pwd, self.mOldPwd);
             self.verifyEqual(chdir('', 'Debug'), {});
         end
+        function testFunctionEmpty(self, dataSingle)
+            path = fullfile(self.mTestRoot, dataSingle);
+            self.assumeEqual(exist(path, 'dir'), 7);
+
+            self.assumeEqual(pwd, self.mOldPwd);
+            self.assumeEqual(chdir('', 'Debug'), {});
+
+            chdir(path);
+            self.verifyEqual(pwd, path);
+            self.verifyEqual(chdir('', 'Debug'), {self.mOldPwd});
+
+            chdir('');
+            self.verifyEqual(pwd, path);
+            self.verifyEqual(chdir('', 'Debug'), {self.mOldPwd});
+
+            chdir('-');
+            self.verifyEqual(pwd, self.mOldPwd);
+            self.verifyEqual(chdir('', 'Debug'), {});
+
+            self.verifyWarning(@() chdir('-'), 'chdir:NoHistory');
+            self.verifyEqual(pwd, self.mOldPwd);
+            self.verifyEqual(chdir('', 'Debug'), {});
+        end
         function test0Args(self)
             self.verifyError(@() chdir, 'chdir:BadArgumentNumber');
             self.verifyEqual(pwd, self.mOldPwd);

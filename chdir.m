@@ -63,7 +63,7 @@ function varargout = chdir(path, varargin)
             cd(oldPwd{end});
             oldPwd(end) = [];
         end
-    elseif (~strcmp(path, '.')  && ~strcmp(path, pwd))
+    elseif (~isempty(path) && ~strcmp(path, '.')  && ~strcmp(path, pwd))
         % Try to go to directory
         try
             oldPwd = [oldPwd, {pwd}];
