@@ -14,7 +14,8 @@ function [fullPathStr] = fullpath(pathStr)
 % Requires: chdir
 
     % Finds file path, file name and file extension:
-    if (strcmp(pathStr, '.') || strcmp(pathStr, '..'))
+    if (((size(pathStr, 2) >= 1) && strcmp(pathStr(end), '.')) || ...
+        ((size(pathStr, 2) >= 2) && strcmp(pathStr((end-1):end), '..')))
         filename = '';
         fileext = '';
         filepath = pathStr;
@@ -22,13 +23,15 @@ function [fullPathStr] = fullpath(pathStr)
         [filepath, filename, fileext] = fileparts(pathStr);
     end
     % Change to file path:
-    if (~isempty(filepath))
+    chdired = false;
+    if (~isempty(filepath) && ~strcmp(filepath, '.'))
         chdir(filepath);
-    else
-        chdir('.');
+        chdired = true;
     end
     % Full path is now: [pwd, filesep, filename, fileext]:
     fullPathStr = fullfile(pwd, [filename, fileext]);
     % Return to initial directory:
-    chdir('-');
+    if chdired
+        chdir('-');
+    end
 end
