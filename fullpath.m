@@ -1,17 +1,17 @@
 function [fullPathStr] = fullpath(pathStr)
-%% FULLPATH Returns the absolute path to the path given.
-% This function finds the absolute path to the given path. The given path
-% may point to a file, a folder, or a non existant thing.
-%   @param pathStr A path to somewhere.
-%   @returns fullpathStr The absolute path to the path.
+% @brief Absolute path
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
+% Find the absolute path to the given path. The given path
+% may point to a file, a folder, or a non existing thing.
+% @param pathStr A path (relalive or absolute).
+% @return The absolute path to the given path.
 %
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: chdir
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 24th, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:   chdir
 
     % Finds file path, file name and file extension:
     if (((size(pathStr, 2) >= 1) && strcmp(pathStr(end), '.')) || ...
