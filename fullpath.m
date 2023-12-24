@@ -24,9 +24,32 @@ function [fullPathStr] = fullpath(pathStr)
     end
     % Change to file path:
     oldPwd = pwd;
-    chdir(filepath);
-    % Full path is now: [pwd, filesep, filename, fileext]:
-    fullPathStr = fullfile(pwd, [filename, fileext]);
+    while (true)
+        try
+            if isempty(filepath)
+                fullPathStr = fullfile(pwd, [filename, fileext]);
+                break;
+            end
+            if strcmp(filepath, filesep)
+                fullPathStr = [filepath, filename, fileext];
+                break;
+            end
+            chdir(filepath);
+            fullPathStr = fullfile(pwd, [filename, fileext]);
+            break;
+        catch anyErr
+            if strcmp(anyErr.identifier, 'chdir:NonExistentFolder')
+                [filepath, name, ext] = fileparts(filepath);
+                if ~isempty(ext)
+                    filename = fullfile([name, ext], filename);
+                else
+                    filename = fullfile(name, filename);
+                end
+            else
+                rethrow(anyErr);
+            end
+        end
+    end
     % Return to initial directory:
     if ~strcmp(oldPwd, pwd)
         chdir('-');
