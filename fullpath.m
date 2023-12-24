@@ -23,15 +23,12 @@ function [fullPathStr] = fullpath(pathStr)
         [filepath, filename, fileext] = fileparts(pathStr);
     end
     % Change to file path:
-    chdired = false;
-    if (~isempty(filepath) && ~strcmp(filepath, '.'))
-        chdir(filepath);
-        chdired = true;
-    end
+    oldPwd = pwd;
+    chdir(filepath);
     % Full path is now: [pwd, filesep, filename, fileext]:
     fullPathStr = fullfile(pwd, [filename, fileext]);
     % Return to initial directory:
-    if chdired
+    if ~strcmp(oldPwd, pwd)
         chdir('-');
     end
 end
