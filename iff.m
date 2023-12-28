@@ -1,39 +1,55 @@
 function ret = iff(condition, varargin)
-%% IFF Inline if constuct
+% @brief Inline if constuct
+%
 % Allows to use inline if constructs with MATLAB. This is equilavlent to
 % the ternary operator (?:) of C-based languages.
-% This function is very usefull when writing anonymous functions: You
-% cannot use the default if constuct in this context.
-%   @param condition A MATLAB expression evaluating to a boolean
-%   @param trueResult The value returned by the function if the condition
-% evaluates to true
-%   @param falseResult [optional] The value returned by the function if the
-% condition evaluates to false
-%   @return 
-%       -trueResult if the condition evaluates to true
-%       -falseResult if the condition evaluates to false and it is provided
-%       -A default value for true result type if the condition evaluates to
-% false and there are only 2 arguments.
 %
-% Examples:
-%   iff(true, 'True', 'False') % Returns 'True'
-%   iff(false, 'True', 'False') % Returns 'False'
-%   iff(true, 'True') % Returns 'True'
-%   iff(false, 'True') % Returns '' which is the default value for strings
+% \note This function is very usefull when writing anonymous functions,
+% as the default if constuct cannot be used in this context.
+% @param condition A MATLAB expression evaluating to a boolean
+% @param varargin The following arguments are accepted:
+%   - **trueResult** The value returned by the function if the condition
+% evaluates to \c true
+%   - **falseResult** (optional) The value returned by the function if the
+% condition evaluates to \c false
+% @return Depending on the condition
+%   - **trueResult** if the condition evaluates to \c true
+%   - **falseResult** if the condition evaluates to \c false and it is provided
+%   - A default value for true result type if the condition evaluates to
+% \c false and there are only 2 arguments.
 %
+% \par Examples
+% Returns \c 'True'
+% \code{.m}
+%   iff(true, 'True', 'False')
+% \endcode
+% Returns \c 'False'
+% \code{.m}
+%   iff(false, 'True', 'False')
+% \endcode
+% Returns \c 'True'
+% \code{.m}
+%   iff(true, 'True')
+% \endcode
+% Returns \c '' which is the default value for strings
+% \code{.m}
+%   iff(false, 'True')
+% \endcode
+% Usage example (returns <tt>[0, 1 -1, 1, -1]</tt>)
+% \code{.m}
 %   % Declaration of an anonymous function
 %   sign = @(X) iff(X < 0, -1, iff(X > 0, 1));
 %   % NB: The defaut for an array of number A is zeros(size(A))
 %   % Using the function:
-%   arrayfun(sign, [0, 1, -2, 3, -4]) % returns [0, 1 -1, 1, -1]
+%   arrayfun(sign, [0, 1, -2, 3, -4])
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     May 1st, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 28th, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
 
     %% Argument number checking
     if (nargin < 2)
