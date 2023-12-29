@@ -1,36 +1,68 @@
 function [container] = select(fun, container, dim)
-%% SELECT Select elements of a container matching a criterium.
-% Removes the elements which don't match a criterium given by some
-% function from a container.
-%   @param fun The criterium function. It will be applied to subcontainers
-%   of the given container along the dimension i.
-%   @param container The container where elements will be selected.
-%   @param dim The dimension along which the container will be parsed.
-%   @return The container where the non-selected elements have been
-%   removed.
+% @brief Select elements of a container matching a criterium.
 %
-% Examples:
+% Removes from a container the elements which don't match a criterium
+% given by some function handle.
+% @param fun The criterium function. It will be applied to subcontainers
+% of the given container along the given dimension.
+% @param container The container where elements will be selected.
+% Matrices, char arrays, structure arrays and cell arrays are supported.
+% @param dim The dimension along which the container will be parsed.
+% @return The container where the non-selected elements have been removed.
+%
+% @note
+% When the container essentially has a single dimension, the **dim**
+% argument is optional
+%
+% \par Examples
+% Given the following funtion
+% \code{.m}
 %   % Test if argument is even
 %   even = @(X) all(mod(X, 2) == 0);
+% \endcode
+% These two calls will return <tt>[2, 4]</tt>. In the first case, the
+% second (column) dimension has been selected automatically as there is
+% only one line.
+% \code{.m}
+%   select(even, [1, 2, 3, 4]);
+%   select(even, [1, 2, 3, 4], 2);
+% \endcode
+% In this case, the function will return an empty matrix of size 0x4 as some
+% the elements in the line are odd, hence it has not been selected.
+% \code{.m}
+%   select(even, [1, 2, 3, 4], 1);
+% \endcode
+% These two calls will return <tt>[2; 4]</tt>. In the first case, the
+% first (line) dimension has been selected automatically as there is
+% only one column.
+% \code{.m}
+%   select(even, [1; 2; 3; 4]);
+%   select(even, [1; 2; 3; 4], 1);
+% \endcode
+% In this case, the function will return an empty matrix of size 4x0 as some
+% the elements in the column are odd, hence it has not been selected.
+% \code{.m}
+%   select(even, [1; 2; 3; 4], 2);
+% \endcode
+% Here, the function will return <tt>[4, 8]</tt> as the function will be
+% applied line-wise and the second line is the only one containing only
+% even numbers.
+% \code{.m}
+%   select(even, [1, 2; 4, 8], 1);
+% \endcode
+% Here, the function will return <tt>[2; 8]</tt> as the function will be
+% applied column-wise and the second column is the only one containing only
+% even numbers.
+% \code{.m}
+%   select(even, [1, 2; 4, 8], 2);
+% \endcode
 %
-%   select(even, [1, 2, 3, 4]); % returns [2, 4]
-%   select(even, [1, 2, 3, 4], 2); % equivalent to previous.
-%   select(even, [1, 2, 3, 4], 1); % returns empty([0, 4])
-%
-%   select(even, [1; 2; 3; 4]); % returns [2; 4]
-%   select(even, [1; 2; 3; 4], 1); % equivalent to previous.
-%   select(even, [1; 2; 3; 4], 2); % returns empty([4, 0])
-%
-%   select(even, [1, 2; 4, 8], 1); % returns [4, 8]
-%   select(even, [1, 2; 4, 8], 2); % returns [2; 8]
-%
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     May 1st, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 29th, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
 
     %% Checks arguments
     % Check container type
