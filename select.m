@@ -1,4 +1,4 @@
-function [container] = select(fun, container, varargin)
+function [container] = select(fun, container, dim)
 %% SELECT Select elements of a container matching a criterium.
 % Removes the elements which don't match a criterium given by some
 % function from a container.
@@ -35,31 +35,21 @@ function [container] = select(fun, container, varargin)
     %% Checks arguments
     % Check container type
     if (~iscell(container) && ~isnumeric(container) && ~isstruct(container) && ~ischar(container))
-        error('MATLAB:BadArgument', 'This function supports only numeric, cell, struct or char arrays');
+        error('select:BadArgument', 'This function supports only numeric, cell, struct or char arrays');
     end
     % Check argument number
-    if (nargin == 2)
+    if (nargin < 3)
         dim = find(size(container) > 1);
         if (any(size(dim) > [1 1]))
-            error('MATLAB:BadArgument', 'When 2 arguments are passed the container should be essentialy of dimension one.');
+            error('select:BadArgument', 'When 2 arguments are passed the container should be essentialy of dimension one.');
         elseif (isempty(dim))
             dim = 1;
         end
-    elseif (nargin == 3)
-        dim = varargin{1};
-    else
-        error('MATLAB:BadArgumentNumber', 'This function accepts 2 or three arguments. %d were passed.', nargin);
-    end
-    
-    %% Initialisation of output container and type
-    S = struct;
-    if (iscell(container))
-        S.type = '{}';
-    else
-        S.type = '()';
     end
     
     %% Initialisation of subs
+    S = struct;
+    S.type = '()';
     S.subs = cell(size(size(container)));
     for m = 1:size(S.subs, 2)
         S.subs{m} = ':';
@@ -70,7 +60,7 @@ function [container] = select(fun, container, varargin)
     for i = 1:size(container, dim)
         S.subs{dim} = i;
         item = subsref(container, S);
-        if (fun(item))
+        if (~isempty(item) && fun(item))
             if (j ~= i)
                 S.subs{dim} = j;
                 container = subsasgn(container, S, item);
@@ -81,7 +71,6 @@ function [container] = select(fun, container, varargin)
     
     %% Crop the useless part of array
     if (j <= size(container, dim))
-        S.type = '()';
         S.subs{dim} = j:size(container, dim);
         container = subsasgn(container, S, []);
     end
