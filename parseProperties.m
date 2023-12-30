@@ -1,67 +1,79 @@
 function values = parseProperties(values, properties, varargin)
-%% PARSEPROPERTIES This function parses a property list.
-% This function is in charge of parsing a property-value list and assigning the
-% appropriate values in the handles struct.
-%	@param values A structure whose fields will be assigned with the values
-% found in the properties-value list.
-%	@param properties A Nx1 structure array whose lines represent a property.
+% @brief Parse a property-value list
+%
+% Parse a property-value list and assign the appropriate values
+% in the given struct.
+% @param values A structure whose fields will be assigned with the values
+% found in the properties-value list
+% @param properties A Nx1 structure array whose lines represent a property.
 % The stuctures must have the following fields:
-%		-name: The name of the property (corresponding to the name of the field
+%   - <tt>'name'</tt> The name of the property (corresponding to the name of the field
 % in the handle structure.
-%		-type: The type of the property. Currently supported types are:
-%			*flag: A property with no value. When set call the parsing function.
-%           *cell: A property associated with a cell-array value (content
+%   - <tt>'type'</tt> The type of the property. Currently supported types are:
+%     * <tt>flag</tt> A property with no value. When set call the parsing function.
+%     * <tt>cell</tt> A property associated with a cell-array value (content
 % type is not checked by this function.
-%			*char: A property associated with a character string.
-%			*integer: A property associated with an integer value.
-%           *logical: A property associated with a logical value.
-%           *numeric: A property associated with a numeric value.
-%           *struct: A property associated with a struct value.
-%           *int8: A property associated with a 8-bit integer value. Value
-% must be between -2^7 and 2^7 - 1 included.
-%           *uint8: A property associated with a 8-bit unsigned integer 
-% value. Value must be between 0 and 2^8 - 1 included.
-%           *int16: A property associated with a 16-bit integer value. Value
-% must be between -2^15 and 2^15 - 1 included.
-%           *uint16: A property associated with a 16-bit unsigned integer 
-% value. Value must be between 0 and 2^16 - 1 included.
-%           *int32: A property associated with a 32-bit integer value. Value
-% must be between -2^31 and 2^31 - 1 included.
-%           *uint32: A property associated with a 32-bit unsigned integer 
-% value. Value must be between 0 and 2^32 - 1 included.
-%           *int64: A property associated with a 64-bit integer value. Value
-% must be between -2^63 and 2^63 - 1 included.
-%           *uint64: A property associated with a 64-bit unsigned integer 
-% value. Value must be between 0 and 2^64 - 1 included.
-%		-size: The size of the value associated with this property. Use 0 to
-% remove a constraint on one dimension.
-%		-parse: A handle to the function in charge of parsing the property.
-% There is a default parsing function.
-%		-min: The minimum value for this property. Use [] to remove the 
-% constraint.
-%		-max: The maximum value for this property. Use [] to remove the 
-% constraint.
-%   @param varargin: The property-value list (Use vararagin{:} to forward).
+%     * <tt>char</tt> A property associated with a character array.
+%     * <tt>integer</tt> A property associated with an integer value.
+%     * <tt>logical</tt> A property associated with a logical value.
+%     * <tt>numeric</tt> A property associated with a numeric value.
+%     * <tt>struct</tt> A property associated with a structure value.
+%     * <tt>int8</tt> A property associated with a 8-bit integer value. Value
+% must be between <tt>-2^7</tt> and <tt>2^7 - 1</tt> included.
+%     * <tt>uint8</tt> A property associated with a 8-bit unsigned integer
+% value. Value must be between <tt>0</tt> and <tt>2^8 - 1</tt> included.
+%     * <tt>int16</tt> A property associated with a 16-bit integer value. Value
+% must be between <tt>-2^15</tt> and <tt>2^15 - 1</tt> included.
+%     * <tt>uint16</tt> A property associated with a 16-bit unsigned integer
+% value. Value must be between <tt>0</tt> and <tt>2^16 - 1</tt> included.
+%     * <tt>int32</tt> A property associated with a 32-bit integer value. Value
+% must be between <tt>-2^31</tt> and <tt>2^31 - 1</tt> included.
+%     * <tt>uint32</tt> A property associated with a 32-bit unsigned integer
+% value. Value must be between <tt>0</tt> and <tt>2^32 - 1</tt> included.
+%     * <tt>int64</tt> A property associated with a 64-bit integer value. Value
+% must be between <tt>-2^63</tt> and <tt>2^63 - 1</tt> included.
+%     * <tt>uint64</tt> A property associated with a 64-bit unsigned integer
+% value. Value must be between <tt>0</tt> and <tt>2^64 - 1</tt> included.
+%   - <tt>'size'</tt> The size of the value associated with this property.
+% Use <tt>0</tt> to remove a constraint on one dimension.
+%   - <tt>'parse'</tt> A handle to the function in charge of parsing the property.
+% There is a default parsing function. It simmply assigns the value to the
+% field whose name corresponds to the property name in lower case.
+%   - <tt>'min'</tt> The minimum value for this property.
+% Use <tt>[]</tt> to remove the constraint.
+%   - <tt>'max'</tt> The maximum value for this property.
+% Use <tt>[]</tt> to remove the constraint.
+% @param varargin The property-value list (Use <tt>vararagin{:}</tt> to forward).
+% @return A structure whose fields have been assigned with the values
+% found in the properties-value list
 %
-% Examples:
-%   % From mosaicFigure (see <a href="https://github.com/pasccom/MATLAB-code/blob/master/mosaicFigure.m">mosaicFigure</a>)
-%   properties = struct( ...
-%       'name', {'DealStrategy'; 'LayoutStrategy'; 'Title'}, ...
-%       'type', {'integer'; 'integer'; 'char'}, ...
-%       'size', {[1, 1]; [1, 1]; [1, 0]}, ...
-%       'parse', {@parseDealStrategy; @parseLayoutStrategy; []}, ...
-%       'min' , {1; 1; []}, ...
-%       'max' , {3; 4; []} ...
+% \par Examples
+% This example is taken from mosaicFigure()
+% \code{.m}
+%   values = struct;
+%   % Default settings
+%   values.title = [];
+%   values.dealStrategy = @dealFigures3;
+%   values.layoutStrategy = @computeLayout4;
+%   % Defined properties
+%   props = struct(                                                   ...
+%       'name',  {    'DealStrategy';     'LayoutStrategy'; 'Title'}, ...
+%       'type',  {         'integer';            'integer';  'char'}, ...
+%       'size',  {            [1, 1];               [1, 1];  [1, 0]}, ...
+%       'parse', {@parseDealStrategy; @parseLayoutStrategy;      []}, ...
+%       'min' ,  {                 1;                    1;      []}, ...
+%       'max' ,  {                 3;                    4;      []}  ...
 %   );
-%   values = parseProperties(values, properties, varargin{3:end});
+%   % Parse arguments (from the 3rd)
+%   values = parseProperties(values, props, varargin{3:end});
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: 
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 30th, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:
 
     a = 3;
     while (a <= nargin)
