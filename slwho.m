@@ -1,14 +1,17 @@
 function varargout = slwho(varargin)
-%% SLWHO List and locate all variables in MATLAB and Simulink
+% @brief List and locate all variables in MATLAB and Simulink
+%
 % This function lists and locates all variables from
-%   -The base MATLAB workspace
-%   -The global variables workspace
-%   -The caller workspace
-%   -A MAT-file
-%   -Simulink model workspaces
-%   -Simulink masked block workspaces
-% This function accepts a property-value of arguments which are precised
+%   - The base MATLAB workspace
+%   - The global variables workspace
+%   - The caller workspace
+%   - A MAT-file
+%   - Simulink model workspaces
+%   - Simulink masked block workspaces
+%
+% This function accepts a property-value list of arguments which are listed
 % hereafter.
+%
 % When no output arguments are required this function displays a table 
 % containing the name and the location of each found variable. On the
 % contrary, when the unique output argument is required, it returns a
@@ -16,104 +19,116 @@ function varargout = slwho(varargin)
 % and "place".
 %
 % Source selection properties and flags:
-%   Base: When this flag is given the base workspace variables are included
+%   - <tt>'Base'</tt> When this flag is given the base workspace variables are included
 % in the list.
-%   Global: When this flag is given the global variables are included in
+%   - <tt>'Global'</tt> When this flag is given the global variables are included in
 % the list.
-%   Caller: When this flag is given the caller workspace variables are
+%   - <tt>'Caller'</tt> When this flag is given the caller workspace variables are
 % included in the list.
-%   File: When this property is given with a MAT-file name as argument, the
-% variables contained in the MAT-file are listed.
-%   ModelWS: When this property is given with a model name as argument, the
-% values contained in the model workspace are listed. If the model is not
+%   - <tt>'File'</tt> When this property is given with a MAT-file name as argument,
+% the variables contained in the MAT-file are listed.
+%   - <tt>'ModelWS'</tt> When this property is given with a model name as argument,
+% the values contained in the model workspace are listed. If the model is not
 % currently loaded, it is silently loaded and then closed. If the model
-% name is the wildcard '*', the variables of all currently opened models
+% name is the wildcard <tt>'*'</tt>, the variables of all currently opened models
 % are listed.
-%   Model: When this property is given with a model name as argument, the
-% values contained in the model workspace and all masked subsystem 
+%   - <tt>'Model'</tt> When this property is given with a model name as argument,
+% the values contained in the model workspace and all masked subsystem
 % workspaces are listed. If the model is not currently loaded, it is 
-% silently loaded and then closed. If the model name is the wildcard '*', 
+% silently loaded and then closed. If the model name is the wildcard <tt>'*'</tt>,
 % the variables of all currently opened models are listed.
-%   Block: When this property is given with a Simulink block path as
+%   - <tt>'Block'</tt> When this property is given with a Simulink block path as
 % argument, the values contained in all masked subsystem workspaces are 
 % listed. If the model is not currently loaded, it is silently loaded and
 % then closed.
-%   When none of these properties and flags are given, this function
+%
+% When none of these properties and flags are given, this function
 % behaves as if Base and Global flags were specified and the property Model
 % was given with argument '*'.
 %
 % Output filtering and formating properties and flags:
-%   Name: When this property is given with a comma-separated list of
+%   - <tt>'Name'</tt> When this property is given with a comma-separated list of
 % variable names as argument, filters the list with the given variable
 % names.
-%   RegExp: When this property is given with a regular expression as 
+%   - <tt>'RegExp'</tt> When this property is given with a regular expression as
 % argument, filters the list with the provided regular expression.
-%   Truncate: When no return arguments are required and this flag is
+%   - <tt>'Truncate'</tt> When no return arguments are required and this flag is
 % given, truncates the displayed values so that they fit in the command
 % window. Truncated values are ended by ellipsis. Otherwise you may have to
 % scroll horizontally.
 %
 % Simulink search options properties and flags:
-%   SearchDepth: When this property is given with a natural number as 
-% argument, the search depth is limited for masks (See Model and Block
+%   - <tt>'SearchDepth'</tt> When this property is given with a natural number as
+% argument, the search depth is limited for masks (See <tt>'Model'</tt> and <tt>'Block'</tt>
 % properties). 0 will limit the output to the block itself.
-%   FollowLinks: By default, the search is stopped by library-linked
+%   - <tt>'FollowLinks'</tt> By default, the search is stopped by library-linked
 % blocks. Specifying this flag allows to remove this constraint.
-%   LookUnderMasks: By default, the search is stopped by non-graphical 
+%   - <tt>'LookUnderMasks'</tt> By default, the search is stopped by non-graphical
 % masks. Specifying this flag allows to remove this constraint.
 %
-% Examples:
-%   % Lists the variables in base workspace
+% @param varargin Property-value list (see above)
+% @return Nothing or a column structure array with one line
+% for each variable and fields "name" and "place".
+%
+% \par Examples
+%
+% Lists the variables in base workspace
+% \code{.m}
 %   slwho Base
 %   slwho('Base');
-%
-%   % Lists the global variables
+% \endcode
+% Lists the global variables
+% \code{.m}
 %   slwho Global
 %   slwho('Global');
-%
-%   % Lists the variables in the MAT-file test.mat
+% \endcode
+% Lists the variables in the MAT-file test.mat
+% \code{.m}
 %   slwho File test
 %   slwho File test.mat
 %   slwho('File', 'test');
 %   slwho('File', 'test.mat');
-%
-%   % Lists the variables in model test.mdl workspace
+% \endcode
+% Lists the variables in model test.mdl workspace
+% \code{.m}
 %   slwho ModelWS test
 %   slwho ModelWS test.mdl
 %   slwho('ModelWS', 'test');
 %   slwho('ModelWS', 'test.mdl');
-%
-%   % Lists the variables in model test.mdl
-%   % Both varibales from the model workspace 
-%   % and from masks workspace are listed
+% \endcode
+% Lists the variables in model `test.mdl`. Both varibales
+% from the model workspace and from masks workspace are listed
+% \code{.m}
 %   slwho Model test
 %   slwho Model test.mdl
 %   slwho('Model', 'test');
 %   slwho('Model', 'test.mdl');
-%
-%   % Lists the variables in the mask workspaces under test/block
+% \endcode
+% Lists the variables in the mask workspaces under test/block
+% \code{.m}
 %   slwho Block test/block
 %   slwho('Block', 'test/block');
-%
-%   % Filters the list of base workspace variables 
-%   % by the given regular expression (varables names begining with a here)
+% \endcode
+% Filters the list of base workspace variables
+% by the given regular expression (varables names begining with "a" here)
+% \code{.m}
 %   slwho Base RegExp '^a'
 %   slwho('Base', 'RegExp', '^a');
-%
-%   % Filters the list of base workspace variables 
-%   % by the given variable name list
+% \endcode
+% Filters the list of base workspace variables by the given variable name list
+% \code{.m}
 %   slwho Base Name test
 %   slwho Base Name 'test, Test'
 %   slwho('Base', 'Name', 'test');
 %   slwho('Base', 'Name', 'test, Test');
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
-%
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     June 19th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: parseProperties, select, StringSplit, strjoin
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 30th, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:   parseProperties, select, strsplit, strjoin
 
     %% Reading argument list:
     if (nargout > 1)
@@ -298,6 +313,12 @@ function varargout = slwho(varargin)
 end
 
 function values = parseFile(values, value)
+% @brief Check file name
+%
+% This function is used by the argument parser to check the given file name.
+% @param values The value list before parsing the current property value
+% @param value The value for the current property
+% @return The value list after parsing the current property value
     if (~strcmp(value((end-3):end), '.mat'))
         value = [value, '.mat'];
     end
@@ -308,6 +329,12 @@ function values = parseFile(values, value)
 end
 
 function values = parseModel(values, value)
+% @brief Check model name
+%
+% This function is used by the argument parser to check the given model name.
+% @param values The value list before parsing the current property value
+% @param value The value for the current property
+% @return The value list after parsing the current property value
     if (~strcmp(value, '*') && (length(value) > 4) && strcmp(value((end-3):end), '.mdl'))
         value = value(1:(end-4));
     end
@@ -322,6 +349,12 @@ function values = parseModel(values, value)
 end
 
 function values = parseModelWS(values, value)
+% @brief Check model name
+%
+% This function is used by the argument parser to check the given model name.
+% @param values The value list before parsing the current property value
+% @param value The value for the current property
+% @return The value list after parsing the current property value
     if (~strcmp(value, '*') && (length(value) > 4) && strcmp(value((end-3):end), '.mdl'))
         value = value(1:(end-4));
     end
@@ -336,6 +369,12 @@ function values = parseModelWS(values, value)
 end
 
 function values = parseName(values, value)
+% @brief Check file name
+%
+% This function is used by the argument parser to check the given name.
+% @param values The value list before parsing the current property value
+% @param value The value for the current property
+% @return The value list after parsing the current property value
     names = stringSplit(value, ',');
     names = cellfun(@(name) strtrim(name), names, 'UniformOutput', false);
     goodNames = select(@(name) ~isempty(regexp(name, '^[A-Za-z][A-Za-z0-9_]*$', 'match', 'once')), names);
@@ -348,6 +387,11 @@ function values = parseName(values, value)
 end
 
 function alreadyOpen = checkModel(modelname)
+% @brief Check model
+%
+% Ensure the given model is openned
+% @param modelname The name of the model
+% @return Whether the model was already opened
     if (strcmp(modelname, '*'))
         alreadyOpen = true;
     else
@@ -366,6 +410,14 @@ function alreadyOpen = checkModel(modelname)
 end
 
 function vars = putVarsInStruct(variables, location)
+% @brief Add vars to return struct
+%
+% Create a struct from the given variables and location
+% @param variables A column cell-array of variables names
+% @param location The location of the variables
+% @return A struct with fields:
+%   - <tt>'name'</tt> The variable name
+%   - <tt>'place'</tt> The variable location
         vars = struct('name', cell(size(variables)), ...
                       'place', cell(size(variables)));
         for v = 1:size(variables, 1);
@@ -376,10 +428,21 @@ function vars = putVarsInStruct(variables, location)
 end
 
 function str = strFormat(str)
+% @brief Format a char array
+%
+% Currently simply replaces multiple spaces with a single one.
+% @param str The string to be processed
+% @return The processed string
     str = regexprep(str, '\s+', ' ');
 end
 
 function str = truncate(str, len)
+% @brief Truncate a char array
+%
+% Truncate the char array at the given length
+% @param str The string to be processed
+% @param len The length of the final string
+% @return The processed string
     if (size(str, 2) > len)
         str = [str(1:(len-3)), '...'];
     end
