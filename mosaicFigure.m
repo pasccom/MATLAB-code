@@ -1,63 +1,92 @@
 function newFigHandle = mosaicFigure(varargin)
-%% MOSAICFIGURE Creates an auto-tiling figure.
-% This function can be used to manage figure positions. It was created to
-% get around the fact that MATLAB always creates figures at the same
-% position. Figures can be grouped and assigned to a monitor (monitor 0
-% means any monitor).
+% @brief Auto-tiling figure
 %
-% Usage:
-%   mosaicFigure(...) : Creates a new figure which is out of any group and
-% not assigned to any monitor. Makes it the active figure.
-%   mosaicFigure(m, ...) : Creates a new figure which is out of any group 
-% and assigned to monitor m. Makes it the active figure.
-%   mosaicFigure(m, group, ...) : Creates a new figure in specified group
-% (string or number) and assigned to monitor m . Makes it the active 
+% Manage figure positions. Indeed, by default, MATLAB always creates
+% figures at the same position. Figures can be grouped and assigned
+% to a monitor (monitor <tt>0</tt> means any monitor).
+%
+% \par Creating figures
+% To create a new figure, the function can be invoked as follows:
+%   - Without arguments, this function creates a new figure
+% which is out of any group and not assigned to any monitor,
+% and makes it the active figure.
+%   - If the first argument is numeric, it is considered as
+% the monitor number, that the figure is assigned to.
+% The new figure is out of any group, it is assigned to the given monitor
+% and it is activated.
+%   - If the next argument (the first argument, or the second argument,
+% if a monitor number was given), is a character array,
+% it is considered as the group name.
+% The function creates a new figure in specified group,
+% assigns it to a monitor (if given), and makes it the active figure.
+%   - If the second argument is a number, it is considered as
+% the group number. The function creates a new figure in specified group,
+% assigns it to the given monitor, and makes it the active figure.
+%
+% In all these cases mosaicFigure() returns the handle to the newly-created
 % figure.
-%   In all these cases mosaicFigure returns the handle to the newly-created
-% figure.
 %
-%   Mosaic figure also accepts properties. They are notified by ... in the
-% invokations. Currentlty the following properties are accepted:
-%   - Title (character string): The title of the newly-created window. 
-%   - DealStrategy (integer(1x1) in the range 1-3): Selects the deal
-% stategies. See the code of each deal strategy for indication on how 
-% they work. 
-%   -LayoutStrategy (integer(1x1) in the range 1-4): Selects the layout 
-% strategy. See the code of each layout strategy for indication on how 
-% they work. 
+% The following properties are currently accepted by mosaicFigure():
+%   - <tt>'Title'</tt> (character array) The title of the
+% newly-created window (defaults to <tt>"Figure f (mosaicFigure)"</tt>,
+% or <tt>"Figure f (group g)"</tt>, if a group number was given,
+% or <tt>"Figure f (groupName)"</tt>, if a group name was given.
+%   - <tt>'DealStrategy'</tt> (integer 1x1 in the range 1-3)
+% Selects the deal stategies. See the code of each deal strategy
+% for indication on how they work. The default one should be the best.
+%   - <tt>'LayoutStrategy'</tt> (integer 1x1 in the range 1-4)
+% Selects the layout strategy. See the code of each layout strategy
+% for indication on how they work. The default one should be the best.
+%   - <tt>'UseJava'</tt> (logical 1x1): Whether to use Java
+% to obtain monitor positions
 %
-% Special commands:
+% \par Special commands
+% Relayout the figures with no assigned group
+% \code{.m}
 %   mosaicFigure layout
-%   Relayout the figures with no assigned group.
+% \endcode
+%   Relayout the group with number *groupNumber*
+% \code{.m}
 %   mosaicFigure layout groupNumber
-%   Relayout the group with number groupNumber
+% \endcode
+% Relayout the group named *groupName*
+% \code{.m}
 %   mosaicFigure layout groupName
-%   Relayout the group named groupName
-%
+% \endcode
+% Closes all the figures managed by mosaicFigure()
+% \code{.m}
 %   mosaicFigure close
 %   mosaicFigure close all
-%   Closes all the figures managed by mosaicFigure.
-%   mosaicFigure closes groupNumber
-%   Closes all the figures in the group number groupNumber
-%   mosaicFigure closes groupName
-%   Closes all the figures in the group named groupName
-%   
-%   Can also be used under function form.
+% \endcode
+% Closes all the figures in the group number groupNumber
+% \code{.m}
+%   mosaicFigure close groupNumber
+% \endcode
+% Closes all the figures in the group named groupName
+% \code{.m}
+%   mosaicFigure close groupName
+% \endcode
+% \note These commands can also be used under function form.
 %
-% Debug usages:
+% \par Debug usages
+% Returns the state of the function (the list of all mosaic figures)
+% \code{.m}
 %   mosaicFigure debug 
-%   Returns the state of the function (the list of all mosaic figures).
-%   Can also be used under function form.
-%   mosaicFigure('debugLayout', group, monitorSizes) allows you to simulate 
-% layout with other monitor sizes than the real ones.
+% \endcode
+% Simulate layout with other monitor sizes than the real ones.
+% \code{.m}
+%   mosaicFigure('debugLayout', group, monitorSizes)
+% \endcode
 %
-% Copyright 2015 Pascal COMBES <pascom@orange.fr>
+% @param varargin Function arguments described above
+% @return Nothing or the handle to the new figure
 %
-% Author:   Pascal COMBES <pascom@orange.fr>
-% Date:     February 15th, 2015
-% Version:  1.0.0
-% License:  GPLv3
-% Requires: parseProperties
+% % Copyright:  2015-2023 Pascal COMBES <pascom@orange.fr>
+% % Author:     Pascal COMBES <pascom@orange.fr>
+% % Date:       December 31st, 2023
+% % Version:    1.0
+% % License:    GPLv3
+% % Requires:   parseProperties
 
     %% Properties:
     % Available properties:
@@ -275,6 +304,14 @@ function newFigHandle = mosaicFigure(varargin)
     
     %% Handler of close events for the figures:
     function closeMosaicFigure(src, ~, group)
+    % @brief Close event handler
+    %
+    % Handle close events for mosaicFigure(): Close the figure
+    % and relayout the remaining figures.
+    % If the figure is part of a group, asks the user whether
+    % all other figures in the group should be closed as well.
+    % @param src The figure which raised the close event
+    % @param group The group the figure belongs to
         % Find the group number of the figure being deleted:
         try
             gr = findGroup(group, figList);
@@ -422,13 +459,12 @@ function newFigHandle = mosaicFigure(varargin)
 end
 
 function closeGroup(group)
-%% CLOSEGROUP Closes a group of figures.
-% This function closes the group of figure given in group.
-% If 'all' is passed, then it closes all the figures created with
-% mosaicFigure without prompt.
-%   @param group A column structure array with the following fields:
-%       -handle: The handle to the corresponding figure.
-%       -screen: The screen ion which the figure must be displayed.
+% @brief Close a group of figures
+%
+% Close all the figures in the given group.
+% @param group A column structure array with the following fields:
+%   - <tt>handle</tt> The handle to the corresponding figure.
+%   - <tt>screen</tt> The screen ion which the figure must be displayed.
     for f=1:length(group)
         %set(group(f).handle, 'CloseRequestFcn', closereq);
         if (ishandle(group(f).handle) && isvalid(group(f).handle))
@@ -438,15 +474,16 @@ function closeGroup(group)
 end
 
 function layout(group, screenSizes, varargin)
-%% LAYOUT Lay a group of figures out.
-% This function accepts two to four arguments:
-%   @param group A column structure array with the following fields:
-%       -handle: The handle to the corresponding figure.
-%       -screen: The screen ion which the figure must be displayed.
-%   @param screenSizes The sizes of the available monitors (as given by MATLAB).
-%   @param handles Optional. Handles to virtual functions (used for
+% @brief Lay a group of figures out
+%
+% @param group A column structure array with the following fields:
+%   - <tt>handle</tt> The handle to the corresponding figure.
+%   - <tt>screen</tt> The screen on which the figure must be displayed.
+% @param screenSizes The sizes of the available monitors (as given by MATLAB).
+% @param varargin The following optionnal arguments are accepted:
+%   - **handles** Handles to virtual functions (used for
 % debugging and choosing the layout strategy).
-%   @param activate Optional. Whether to activate the figure after
+%   - **activate** Whether to activate the figure after
 % laying out or not.
 
     %% Argument parsing and checking:
@@ -502,15 +539,19 @@ function layout(group, screenSizes, varargin)
 end
 
 function [occ, area] = computeOccupation(n0, ns, screenSizes, handles)
-%% COMPUTEOCCUPATION For each layout possibility tells how much screen is used
-% and how big the figures are.
-%   @param n0 The number of figures not assigned to a sceen.
-%   @param ns The number of figures assigned to each screen (a line array).
-%   @param screenSizes The sizes of the available monitors (as given by MATLAB).
-%   @param handles Handles to virtual functions (used for debugging and 
+% @brief Compute screen space used by a figure
+%
+% Tell how much screen is used and how big the figures are,
+% for each layout possibility.
+% @param n0 The number of figures not assigned to a sceen.
+% @param ns The number of figures assigned to each screen (a line array).
+% @param screenSizes The sizes of the available monitors
+% (correctGeometry() must have been used before).
+% @param handles Handles to virtual functions (used for debugging and
 % choosing the layout strategy).
-%   @return occ How much of the screen is occuped.
-%   @return area How big are the figures.
+% @return The following information is returned:
+%   - **occ** How much of the screen is occuped.
+%   - **area** How big are the figures.
 
     %% Stop recursion:
     if (size(screenSizes, 1) == 0)
@@ -573,14 +614,16 @@ function [occ, area] = computeOccupation(n0, ns, screenSizes, handles)
 end
 
 function layoutScreen(figs, screenSize, handles, activate)
-%% LAYOUTSCREEN Layout one screen.
-%   @param figs A column cell array containing the handles to the figures
+% @brief Lay one screen out
+%
+% Lay the given figures out on on screen
+% @param figs A column cell array containing the handles to the figures
 % to assign to the screen.
-%   @param screenSize The size of the screen being laid out
-% (correctGeometry must have been used before).
-%   @param handles Handles to virtual functions (used for debugging and 
+% @param screenSize The size of the screen being laid out
+% (correctGeometry() must have been used before).
+% @param handles Handles to virtual functions (used for debugging and
 % choosing the layout strategy).
-%   @param activate Whether to activate the figure after laying out or not.
+% @param activate Whether to activate the figure after laying out or not.
 
     %% Arguement checking:
     if (isempty(figs))
@@ -612,50 +655,69 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PROPERTIES PARSING FUNCTIONS :
 function handles = parseDealStrategy(handles, value)
-% PARSEDEALSTRATEGY Parses the deal strategy
+% @brief Parse the deal strategy
+%
 % Assign the good deal strategy in the handles array.
-%   @param handles Handles to virtual functions. Field dealFigures will be
+% @param handles Handles to virtual functions. Field <tt>dealFigures</tt> will be
 % modified.
-%   @param value The number of the deal strategy to use.
-%   @return handles Handles to virtual functions. Field dealFigures has
+% @param value The number of the deal strategy to use.
+% @return handles Handles to virtual functions. Field <tt>dealFigures</tt> has
 % been modified.
     handles.dealFigures = str2func(sprintf('dealFigures%d', value));
 end
 
 function handles = parseLayoutStrategy(handles, value)
-% PARSELAYOUTSTRATEGY Parses the layout strategy
+% @brief Parse the layout strategy
+%
 % Assign the good layout strategy in the handles array.
-%   @param handles Handles to virtual functions. Field computeLayout will be
+% @param handles Handles to virtual functions. Field <tt>computeLayout</tt> will be
 % modified.
-%   @param value The number of the deal strategy to use.
-%   @return handles Handles to virtual functions. Field computeLayout has
+% @param value The number of the deal strategy to use.
+% @return handles Handles to virtual functions. Field <tt>computeLayout</tt> has
 % been modified.
     handles.computeLayout = str2func(sprintf('computeLayout%d', value));
 end
 
 function handles = parseUseJava(handles, value)
-% PARSEUSEJAVA Parses the layout strategy
-% Assign the good layout strategy to obtain monitor positions.
-%   @param handles Handles to virtual functions. Field getMonitorPositions 
+% @brief Parse Java usage property
+%
+% Modify the handles structure so that Java is not used.
+% Otherwise the monitor positions are obtained using Java.
+% @param handles Handles to virtual functions. Field <tt>getMonitorPositions</tt>
 % will be modified.
-%   @param value The number of the deal strategy to use.
-%   @return handles Handles to virtual functions. Field 
-% compgetMonitorPositions  has been modified.
+% @param value The number of the deal strategy to use.
+% @return handles Handles to virtual functions. Field
+% <tt>getMonitorPositions</tt> has been modified.
     if (~value)
         handles.getMonitorPositions = @getMonitorPositions;
     end 
 end
 
+function handles = parseMonitorPositions(handles, value)
+% @brief Parse monitor positions
+%
+% Ensure that the given monitor positions are used when laying out
+% the figures.
+% @param handles Handles to virtual functions. Field <tt>getMonitorPositions</tt>
+% will be modified.
+% @param value The number of the deal strategy to use.
+% @return handles Handles to virtual functions. Field
+% <tt>getMonitorPositions</tt> has been modified.
+    handles.getMonitorPositions = @() value;
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SCREEN DEALING FUNCTIONS :
 function [deal] = dealFigures1(occs, areas) %#ok This is a virtual function which may be called when selecting DealStrategy 1
-%% DEALFIGURES1 Find the best deal between monitors for the figures
+% @brief Deal figures between monitors
+%
+% Find the best deal between monitors for the figures.
 % This function tries to find the best tradeoff between areas and screen
 % occupation. It does it by a dichotomy selecting occupations greather than
 % a level and relative difference in areas smaller than (1 - level)^2.
-%   @param occs Screen occupations.
-%   @param areas Figures areas.
-%   @return deal A line vector containing the best deal of the figures
+% @param occs Screen occupations.
+% @param areas Figures areas.
+% @return deal A line vector containing the best deal of the figures
 % between all the available screens.
     minAreas = min(areas + 1./areas.*(areas == 0), [], 2);
     
@@ -687,15 +749,17 @@ function [deal] = dealFigures1(occs, areas) %#ok This is a virtual function whic
 end
 
 function [deal] = dealFigures2(occs, areas) %#ok This is a virtual function which may be called when selecting DealStrategy 2
-%% DEALFIGURES2 Find the best deal between monitors for the figures
+% @brief Deal figures between monitors
+%
+% Find the best deal between monitors for the figures
 % This function tries to find the best tradeoff between areas and screen
 % occupation. It does it by a dichotomy selecting occupations greather than
 % a level and relative difference in total areas covered by figures smaller
 % than (1 - level)^2 and then selecting the deal with the biggest possible
 % areas.
-%   @param occs Screen occupations.
-%   @param areas Figures areas.
-%   @return deal A line vector containing the best deal of the figures
+% @param occs Screen occupations.
+% @param areas Figures areas.
+% @return deal A line vector containing the best deal of the figures
 % between all the available screens.
     sumAreas = sum(areas.*occs(:, 1:size(areas, 2)), 2);
     
@@ -728,15 +792,17 @@ function [deal] = dealFigures2(occs, areas) %#ok This is a virtual function whic
 end
 
 function [deal] = dealFigures3(occs, areas)
-%% DEALFIGURES3 Find the best deal between monitors for the figures
+% @brief Deal figures between monitors
+%
+% Find the best deal between monitors for the figures
 % This function tries to find the best tradeoff between areas and screen
 % occupation. It does it by a dichotomy selecting occupations greather than
 % a level and relative difference in total areas covered by figures smaller
 % than (1 - level)^2 and then selecting the deal with the smallest possible 
 % area difference.
-%   @param occs Screen occupations.
-%   @param areas Figures areas.
-%   @return deal A line vector containing the best deal of the figures
+% @param occs Screen occupations.
+% @param areas Figures areas.
+% @return deal A line vector containing the best deal of the figures
 % between all the available screens.
     sumAreas = sum(areas.*occs(:, 1:size(areas, 2)), 2);
     
@@ -771,16 +837,20 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LAYOUT COMPUTING FUNCTIONS :
 function [l, c, wf, hf] = computeLayout1(n, w, h) %#ok This is a virtual function which may be called when selecting LayoutStrategy 1
-%% COMPUTELAYOUT1 Tries to find the best line and columns number
-% It tries to have the quotient hf/wf close to 1 (square figure).
-%   @param n The number or figures which will be eventually displayed on
+% @brief Lay a screen out
+%
+% Tries to find the best line and columns number to lay out
+% the given number of figures on a screen.
+% This function tries to have the quotient hf/wf close to 1 (square figure).
+% @param n The number or figures which will be eventually displayed on
 % this screen.
-%   @param w The width of the screen.
-%   @param w The height of the screen.
-%   @return l The number of lines of figures.
-%   @return c The number of colums of figures.
-%   @return wf The width of the figures.
-%   @return hf The height of the figures.
+% @param w The width of the screen.
+% @param h The height of the screen.
+% @return The following informarion:
+%   - **l** The number of lines of figures.
+%   - **c** The number of colums of figures.
+%   - **wf** The width of the figures.
+%   - **hf** The height of the figures.
 
     %% Determines the best values for l and c:
     % Tries to get the best square figure.
@@ -813,16 +883,20 @@ function [l, c, wf, hf] = computeLayout1(n, w, h) %#ok This is a virtual functio
 end
 
 function [l, c, wf, hf] = computeLayout2(n, w, h) %#ok This is a virtual function which may be called when selecting LayoutStrategy 2
-%% COMPUTELAYOUT2 Tries to find the best line and columns number
+% @brief Lay a screen out
+%
+% Tries to find the best line and columns number to lay out
+% the given number of figures on a screen.
 % It tries to have c and l integers close to c0 = w/h*l0 by rounding.
-%   @param n The number or figures which will be eventually displayed on
+% @param n The number or figures which will be eventually displayed on
 % this screen.
-%   @param w The width of the screen.
-%   @param w The height of the screen.
-%   @return l The number of lines of figures.
-%   @return c The number of colums of figures.
-%   @return wf The width of the figures.
-%   @return hf The height of the figures.
+% @param w The width of the screen.
+% @param h The height of the screen.
+% @return The following informarion:
+%   - **l** The number of lines of figures.
+%   - **c** The number of colums of figures.
+%   - **wf** The width of the figures.
+%   - **hf** The height of the figures.
 
    l = round(sqrt(h*n/w));
    if (l == 0)
@@ -834,17 +908,21 @@ function [l, c, wf, hf] = computeLayout2(n, w, h) %#ok This is a virtual functio
 end
 
 function [l, c, wf, hf] = computeLayout3(n, w, h) %#ok This is a virtual function which may be called when selecting LayouStrategy 3
-%% COMPUTELAYOUT3 Tries to find the best line and columns number
+% @brief Lay a screen out
+%
+% Tries to find the best line and columns number to lay out
+% the given number of figures on a screen.
 % It tries to have c and l integers close to c0 = w/h*l0 and then selects
 % the solution which give the closest solution. 
-%   @param n The number or figures which will be eventually displayed on
+% @param n The number or figures which will be eventually displayed on
 % this screen.
-%   @param w The width of the screen.
-%   @param w The height of the screen.
-%   @return l The number of lines of figures.
-%   @return c The number of colums of figures.
-%   @return wf The width of the figures.
-%   @return hf The height of the figures.
+% @param w The width of the screen.
+% @param h The height of the screen.
+% @return The following informarion:
+%   - **l** The number of lines of figures.
+%   - **c** The number of colums of figures.
+%   - **wf** The width of the figures.
+%   - **hf** The height of the figures.
 
    l0 = floor(sqrt(h*n/w));
    l1 = ceil(sqrt(h*n/w));
@@ -859,17 +937,21 @@ function [l, c, wf, hf] = computeLayout3(n, w, h) %#ok This is a virtual functio
 end
 
 function [l, c, wf, hf] = computeLayout4(n, w, h)
-%% COMPUTELAYOUT4 Tries to find the best line and columns number
+% @brief Lay a screen out
+%
+% Tries to find the best line and columns number to lay out
+% the given number of figures on a screen.
 % It tries to have c and l integers close to c0 = w/h*l0 and then selects
 % the solution which give the most square figs. 
-%   @param n The number or figures which will be eventually displayed on
+% @param n The number or figures which will be eventually displayed on
 % this screen.
-%   @param w The width of the screen.
-%   @param w The height of the screen.
-%   @return l The number of lines of figures.
-%   @return c The number of colums of figures.
-%   @return wf The width of the figures.
-%   @return hf The height of the figures.
+% @param w The width of the screen.
+% @param h The height of the screen.
+% @return The following informarion:
+%   - **l** The number of lines of figures.
+%   - **c** The number of colums of figures.
+%   - **wf** The width of the figures.
+%   - **hf** The height of the figures.
     l0 = floor(sqrt(h*n/w));
     l1 = ceil(sqrt(h*n/w));
     if ((l0 == 0) || (abs(1 - sqrt(floor(w/ceil(n/l1))/floor(h/l1))) < abs(1 - sqrt(floor(w/ceil(n/l0))/floor(h/l0)))))
@@ -885,18 +967,26 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HELPER FUNCTIONS :
 function noop(varargin)
-%% NOOP Does nothing with any number of arguments.
+% @brief No-op
+%
+% Do nothing with any number of arguments
+% @param varargin Any arguments
 end
 
 function v = versionNumber()
-%% VERSIONNUMBER Returns the version as a number
-% It is better to have the version as a number in code (for comparisons).
-% The returned number is equal to the year part, plus 1/2 if this ia a b
+% @brief MATLAB version Number
+%
+% Return MATLAB version as a number.
+%
+% Indeed, it is better to have the version as a number in code (for comparisons).
+% The returned number is equal to the year part, plus 1/2 if the version is a b
 % release.
-% Ex:
-%   On 2011a: 2011.0
-%   On 2014b: 2014.5
-%   @returns An number conveying MATLAB version.
+%
+% @returns An number conveying MATLAB version.
+%
+% \par Examples
+%  - When invoked on MATLAB 2011a, this function returns <tt>2011.0</tt>
+%  - When invoked on MATLAB 2014b, this function returns <tt>2014.5</tt>
     ver = version('-release');
     v = sscanf(ver(1:4), '%d');
     if (ver(5) == 'b')
@@ -905,13 +995,18 @@ function v = versionNumber()
 end
 
 function v = windowsVersionNumber()
-%% WINDOWSVERSIONNUMBER Returns the version of Windows as a number
-% It is better to have the version as a number in code (for comparisons).
+% @brief Windows version Number
+%
+% Returns the version of Windows as a number.
+%
+% Indeed, it is better to have the version as a number in code (for comparisons).
 % The returned number is equal to the major number of Windows release.
-% Ex:
-%   On Windows 7: 7
-%   On Windows 10: 10
-%   @returns An number conveying MATLAB version.
+%
+% @returns An number conveying MATLAB version.
+%
+% \par Esamples
+%   - When invoked on Windows 7, this function returns <tt>7</tt>
+%   - When invoked on Windows 10, this function returns <tt>10</tt>
     v = nan;
     [status, verStr] = system('ver');
     if (status == 0)
@@ -924,8 +1019,10 @@ function v = windowsVersionNumber()
 end
 
 function path = getFilePath()
-%% GETFILEPATH Get the file path.
-%   @return path The path to the *.m file.
+% @brief Path to this file
+%
+% Get the path to the folder containing this file.
+% @return The path to the folder containing this file.
 
     path = mfilename('fullpath');
     i = find(path == filesep, 1, 'last');
@@ -935,10 +1032,12 @@ function path = getFilePath()
 end
 
 function g = findGroup(group, list)
-%% FINDGROUP Find the number of the group in list
-%   @param group A integer or a string to represent the searched group.
-%   @param list A line struct array with at least a field group.
-%   @return The number of the given group in the list or an empty array if
+% @brief Find a group
+%
+% Find the index of the group (given as a number of a name) in the list.
+% @param group An integer or a string to represent the searched group.
+% @param list A line struct array with at least a field group.
+% @return The index of the group in the list or an empty array if
 % the group was not found.
 
     % Initialisation:
@@ -964,10 +1063,11 @@ function g = findGroup(group, list)
 end
 
 function str = group2str(group)
-%% GROUP2STR Converts a group identifier to a string
-%   @param group A group identifier (might be a string or an integer).
-%   @return str The given group identifier as a string.
-
+% @brief Convert group to string
+%
+% Converts a group identifier (number or name) to a character array.
+% @param group A group identifier (might be a string or an integer).
+% @return The given group identifier as a character array.
     if (isempty(group))
         str = '';
     elseif (ischar(group))
@@ -980,12 +1080,13 @@ function str = group2str(group)
 end
 
 function figNum = getNumberHandle(fig)
-%% FIGNUMBERHANDLE Creates a figure using the given arguments.
-% This function creates a figure using thee given arguments and returns the
-% number handle to it. This is strictly equivalent to the ficure command in
-% version 2001a.
-%   @params fig The figure created by figure.
-%   @return fig The number handle to the figure.
+% @brief Number handle to a figure
+%
+% Return a numeric handle to the given figure.
+% \note This function needs to be used as the figure handles
+% are not numeric anymore ofter MATLAB R2014b.
+% @param fig The figure handle (returned by `figure`).
+% @return The number handle to the given figure.
     if (versionNumber() < 2014.5)
         figNum = fig;
     else
@@ -994,11 +1095,13 @@ function figNum = getNumberHandle(fig)
 end
 
 function setFigureName(fig, varargin)
-%% SETFIGURENAME Appropriately sets the name of the figure.
-% This function can have two or three arguments:
-%   @param fig The handle to the figure whose name is being set.
-%   @param figNum The number of the figure in its group.
-%   @param figGroup The identifier for the group of the figure.
+% @brief Set figure title
+%
+% Set the title of the figure appropriately (using the <tt>'Name'</tt> property).
+% @param fig The handle to the figure whose name is being set.
+% @param varargin Arguments to set the name:
+%   - **figNum** (Mandatory) The number of the figure in its group.
+%   - **figGroup** (Optionnal) figGroup The identifier for the group of the figure.
     if(nargin > 2)
         if (~isnumeric(varargin{1}) || (varargin{1} ~= round(varargin{1})))
             error('mosaicFigure:BadArgument', 'When this function has 3 arguments, the second must be a number.');
@@ -1024,9 +1127,14 @@ function setFigureName(fig, varargin)
 end
 
 function screenPositions = getMonitorPositionsJava()
-%% GETMONITORPOSITIONS Gives the positions of the monitors using Java methods.
+% @brief Get monitor positions using Java
+%
+% Give the positions of the monitors using Java AWT methods.
 % This function corrects the positions returned by Java AWT methods
 % and returns them.
+% \note This function is more reliable than the positions obtained from MATLAB,
+% see getMonitorPositions().
+% @return The monitor positions obtained from Java AWT methods
     graphicsEnv = javaMethod('getLocalGraphicsEnvironment', 'java.awt.GraphicsEnvironment');
     screenDevices = javaMethod('getScreenDevices', graphicsEnv);
     screenPositions = zeros(length(screenDevices), 4);
@@ -1048,27 +1156,39 @@ function screenPositions = getMonitorPositionsJava()
 end
 
 function screenPositions = getMonitorPositions()
-%% GETMONITORPOSITIONS Gives the positions of the monitors.
-% This function corrects the positions returned by get(0, 'MonitorPositions'))
+% @brief Get monitor positions from MATLAB
+%
+% Give the positions of the monitors.
+% This function corrects the positions returned by
+% \code{.m}
+%    get(0, 'MonitorPositions'))
+% \endcode
 % and returns them.
+% \note This function is less reliable than getMonitorPositionsJava().
+% @return The monitor positions obtained from MATLAB
     screenPositions = correctGeometry(get(0, 'MonitorPositions'));
 end
 
 function geom = correctGeometry(screenSizes)
-%% CORRECTGEOMETRY Gives the correct geometries for screens.
-% When accessed by get(0, 'MonitorPositions'), the given rectangles are
-% badly referenced for figure positionning. Indeed the frame origin is the
-% top-left corner of base screen and vertcial axis is oriented towards 
-% bottom. The rectangles are given as top-left and bottom right corner
-% coordinates and there is an offset of one (but this is needed to draw 
-% figures) 
+% @brief Correct monitor geometry
+%
+% Give the correct geometries for screens.
+% When accessed by
+% \code{.m}
+%   get(0, 'MonitorPositions')
+% \endcode
+% the given rectangles are badly referenced for figure positionning.
+% Indeed the frame origin is the top-left corner of base screen
+% and vertcial axis is oriented towards bottom. The rectangles are given
+% as top-left and bottom right corner coordinates and there is an offset
+% of one (but this is needed to draw figures).
 % This function transforms these coordinates so that the returned vector
 % gives the botton-left corner coordinates and the height and width of the
 % screen. The new frame has axes towards the right and the top of the
 % screen. The origin is the bottom left corner of the main screen. This is
 % what is convenient for positioning figures.
-%   @param monitor: The monitor positions (as returned by get(0, 'MonitorPositions')).
-%   @returns A 1x4 vector with the coordinates of the bottom-left corner of
+% @param screenSizes The monitor positions (as returned by get(0, 'MonitorPositions')).
+% @return A 1x4 vector with the coordinates of the bottom-left corner of
 % the monitor, its width and its height.
     if (versionNumber() >= 2014.5)
         % Geometries are OK from this version
@@ -1089,12 +1209,16 @@ function geom = correctGeometry(screenSizes)
 end
 
 function pos = correctOuterPosition(pos)
-%% CORRECTOUTERPOSITION Corrects the outer position depending on Windows version.
-% On Windows 8, the window borders were removed, but this has never been taken into account by MATLAB: When
-% setting a figure with the screen size as the OuterPosition, there are a few pixels lost.
-% This function corrects the given outer position so that no pixel are lost.
-%   @param pos The desired outer position.
-%   @returns The position corrected so that when using OuterPosition the effective position is as desired.
+% @brief Correct figure outer position
+%
+% Correct the outer position for a figure depending on Windows version.
+% \note On Windows 8, the window borders were removed,
+% but this has never been taken into account by MATLAB:
+% When setting a figure with the screen size as the <tt>OuterPosition</tt>,
+% there are a few pixels lost.
+% @param pos The desired outer position.
+% @returns The position corrected so that when using <tt>OuterPosition</tt>
+% the effective position is as desired.
     if (windowsVersionNumber() > 7)
         pos(1) = pos(1) - 8;
         pos(2) = pos(2) - 8;
@@ -1106,12 +1230,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BACKUP FUNCTIONS :
 function saveBackup(figList)
-%% SAVEBACKUP Saves the figure list
-% In case the figure list gets cleared (for instance by issuing`clear all`).
+% @brief Backup figure list
+%
+% Save the figure list
+% \note In case the figure list gets cleared (for instance by issuing <tt>clear all</tt>).
 % This functions makes an on-disk backup of the figure list so that it can
 % be retrieved later.
-%   @param figList Current figure list
-%   @sa loadBackup()
+% @param figList Current figure list
+% @sa loadBackup()
     backupPath = [tempdir, 'figList.mat'];
     try
         save(backupPath, 'figList');
@@ -1121,12 +1247,13 @@ function saveBackup(figList)
 end
 
 function figList = loadBackup()
-%% LOADBACKUP Loads the figure list from backup
-% Sometimes the figure list is cleared (for instance by issuing`clear all`).
-% When this happens it can be restored from an on disk backup using this
-% function.
-%   @returns the figure list from the backup
-%   @sa saveBackup()
+% @brief Restore figure list
+%
+% Load the figure list from on-disk backup
+% \note Sometimes the figure list is cleared (for instance by issuing <tt>clear all</tt>).
+% When this happens, it can be restored from an on-disk backup using this function.
+% @return The figure list from the on-disk backup
+% @sa saveBackup()
     backupPath = [tempdir, 'figList.mat'];
     try
         backup = load(backupPath);
@@ -1139,24 +1266,29 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DEBUGGING FUNCTIONS :
 function initLayoutDebug(screenSize)
-%% INITLAYOUTDEBUG Initialises a figure to debug the layout.
-% This function is used to initialise layout debuggiung when rectangles are
-% drawn on a figures instead of creating figures.
-%   @param screenSize The size of the screen (correctGeometry must have
+% @brief Initialise a figure to debug the layout
+%
+% Initialise layout debuggiung (when rectangles are
+% drawn on a figure instead of creating figures)
+% @param screenSize The size of the screen (correctGeometry() must have
 % been applied).
     figure('OuterPosition', correctOuterPosition(screenSize));
 end
 
 function layoutScreenDebug(figs, screenSize, handles, activate)
-%% LAYOUTSCREENDEBUG Debug screen layout process.
-% In this mode rectangles representing figures are drawn on a screen
+% @brief Debug screen layout process
+%
+% Lay the given figures out on on screen
+%
+% In this mode rectangles representing figures are drawn on a figure
 % instead of creating figures.
-%   @param figs The figs to layout on this screen.
-%   @param screenSize the size of the screen being laid out (correctGeometry must have
-% been applied).
-%   @param handles Handles to virtual functions (used to choose layout and
+% @param figs A column cell array containing the handles to the figures
+% to assign to the screen.
+% @param screenSize the size of the screen being laid out (correctGeometry()
+% must have been applied).
+% @param handles Handles to virtual functions (used to choose layout and
 % deal strategy).
-%   @param activate Wether to activate the figure or not. Activated figures
+% @param activate Wether to activate the figure or not. Activated figures
 % are represented by a red rectangle whereas normal figures are
 % represented by a green rectangle.
 
